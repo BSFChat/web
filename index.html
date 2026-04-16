@@ -38,8 +38,9 @@
         <div class="container">
           <h1>Chat without the bullshit.</h1>
           <p class="lede">
-            Self-hosted, Discord-style chat you actually own. Run it on your
-            box, your identity provider, your rules. No tracking, no upselling,
+            Self-hosted, Discord-style chat you actually own. Run a server on
+            your box, sign in with a shared BSFChat identity, and use the same
+            account across every server you join. No tracking, no upselling,
             no vendor lock-in.
           </p>
           <a class="btn btn-primary" href="#download">
@@ -67,10 +68,11 @@
               </p>
             </article>
             <article class="tile">
-              <h3>Identity you control</h3>
+              <h3>One identity, every server</h3>
               <p>
-                Ships with an OIDC provider you run. Plug in your own SSO if
-                you'd rather — your users, your directory.
+                Sign in once at <code>id.bsfchat.com</code> and use the same
+                account on every BSFChat server you join. Run your own OIDC
+                provider too if you want — it's standard.
               </p>
             </article>
             <article class="tile">
@@ -132,10 +134,19 @@
         <div class="container">
           <h2>Run your own server</h2>
           <p>
-            The server and identity provider ship as OCI images on GHCR:
-            <code>ghcr.io/bsfchat/server:latest</code> and
-            <code>ghcr.io/bsfchat/identity:latest</code>. Pull them, point a
-            domain at the box, and you have a chat service nobody can revoke.
+            The server ships as an OCI image on GHCR:
+            <code>ghcr.io/bsfchat/server:latest</code>. Pull it, point a
+            domain at the box, point <code>identity.provider_url</code> at
+            <code>https://id.bsfchat.com</code>, and you have a chat service
+            nobody can revoke.
+          </p>
+          <p>
+            Identity is federated on purpose: one account works across every
+            BSFChat server, so your users don't need a new login per server.
+            The default provider is <code>id.bsfchat.com</code>; any
+            OIDC-compliant provider works (including your own — the image is
+            <code>ghcr.io/bsfchat/identity:latest</code> if you want to run
+            one).
           </p>
           <p>
             The reference <code>docker-compose.yml</code> lives in
@@ -149,10 +160,8 @@
     image: ghcr.io/bsfchat/server:latest
     ports:
       - "127.0.0.1:8448:8448"
-  identity:
-    image: ghcr.io/bsfchat/identity:latest
-    ports:
-      - "127.0.0.1:8480:8480"</code></pre>
+    environment:
+      BSFCHAT_IDENTITY_URL: https://id.bsfchat.com</code></pre>
         </div>
       </section>
     </main>
