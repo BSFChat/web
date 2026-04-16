@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BSFChat — Self-hosted chat, no tracking, no lock-in</title>
+    <meta
+      name="description"
+      content="BSFChat is a self-hosted Discord/Teamspeak-style chat app. Own your server, your identity, your data. No tracking, no upselling, no vendor lock-in."
+    />
+    <meta name="theme-color" content="#1e1f22" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">
+          <span class="brand-glyph" aria-hidden="true">B</span>
+          <span class="brand-word">BSFChat</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#features">Features</a>
+          <a href="#download">Download</a>
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <h1>Chat without the bullshit.</h1>
+          <p class="lede">
+            Self-hosted, Discord-style chat you actually own. Run it on your
+            box, your identity provider, your rules. No tracking, no upselling,
+            no vendor lock-in.
+          </p>
+          <a class="btn btn-primary" href="#download">
+            Download for macOS / Windows / Linux
+          </a>
+        </div>
+      </section>
+
+      <section id="features" class="features">
+        <div class="container">
+          <h2>Why BSFChat</h2>
+          <div class="tiles">
+            <article class="tile">
+              <h3>Self-hosted</h3>
+              <p>
+                Own your server, your data, your backups. <code>docker compose
+                up</code>, done. No SaaS in the loop.
+              </p>
+            </article>
+            <article class="tile">
+              <h3>Channels, roles, voice</h3>
+              <p>
+                Categories, text channels, voice rooms over Opus/WebRTC, private
+                channels with Discord-style role permissions.
+              </p>
+            </article>
+            <article class="tile">
+              <h3>Identity you control</h3>
+              <p>
+                Ships with an OIDC provider you run. Plug in your own SSO if
+                you'd rather — your users, your directory.
+              </p>
+            </article>
+            <article class="tile">
+              <h3>No bloat, no dark patterns</h3>
+              <p>
+                No analytics, no ads, no upselling, no "Nitro" tier. Just a chat
+                app that does chat.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="download" class="download">
+        <div class="container">
+          <h2>Download the client</h2>
+          <p class="section-lede">
+            Prebuilt for macOS, Windows, and Linux. Signed releases on GitHub.
+          </p>
+          <div class="tiles">
+            <a
+              class="tile tile-link download-tile"
+              data-platform="macos"
+              href="https://github.com/BSFChat/client/releases/latest/download/BSFChat-macOS.dmg"
+            >
+              <h3>macOS</h3>
+              <p class="download-file">BSFChat-macOS.dmg</p>
+              <p class="download-version" data-version>latest</p>
+            </a>
+            <a
+              class="tile tile-link download-tile"
+              data-platform="windows"
+              href="https://github.com/BSFChat/client/releases/latest/download/BSFChat-Setup.exe"
+            >
+              <h3>Windows</h3>
+              <p class="download-file">BSFChat-Setup.exe</p>
+              <p class="download-version" data-version>latest</p>
+            </a>
+            <a
+              class="tile tile-link download-tile"
+              data-platform="linux"
+              href="https://github.com/BSFChat/client/releases/latest/download/BSFChat-linux-x86_64.tar.gz"
+            >
+              <h3>Linux</h3>
+              <p class="download-file">BSFChat-linux-x86_64.tar.gz</p>
+              <p class="download-version" data-version>latest</p>
+            </a>
+          </div>
+          <p class="download-meta">
+            Source, issues, releases →
+            <a href="https://github.com/BSFChat" rel="noopener"
+              >github.com/BSFChat</a
+            >
+          </p>
+        </div>
+      </section>
+
+      <section id="self-host" class="self-host">
+        <div class="container">
+          <h2>Run your own server</h2>
+          <p>
+            The server and identity provider ship as OCI images on GHCR:
+            <code>ghcr.io/bsfchat/server:latest</code> and
+            <code>ghcr.io/bsfchat/identity:latest</code>. Pull them, point a
+            domain at the box, and you have a chat service nobody can revoke.
+          </p>
+          <p>
+            The reference <code>docker-compose.yml</code> lives in
+            <a href="https://github.com/BSFChat/server" rel="noopener"
+              >github.com/BSFChat/server</a
+            >
+            — clone it, set a couple of env vars, bring it up.
+          </p>
+          <pre><code>services:
+  server:
+    image: ghcr.io/bsfchat/server:latest
+    ports:
+      - "127.0.0.1:8448:8448"
+  identity:
+    image: ghcr.io/bsfchat/identity:latest
+    ports:
+      - "127.0.0.1:8480:8480"</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; <span id="year">2026</span> BSFChat contributors.</p>
+        <p>
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+          &nbsp;·&nbsp;
+          <a href="https://bsfchat.com">bsfchat.com</a>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      (function injectVersion() {
+        var nodes = document.querySelectorAll("[data-version]");
+        if (!nodes.length || typeof fetch !== "function") return;
+        fetch("https://api.github.com/repos/BSFChat/client/releases/latest", {
+          headers: { Accept: "application/vnd.github+json" }
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error("bad status " + r.status);
+            return r.json();
+          })
+          .then(function (data) {
+            var tag = (data && data.tag_name) || "";
+            if (!tag) return;
+            nodes.forEach(function (n) {
+              n.textContent = tag;
+            });
+          })
+          .catch(function () {
+            /* keep the "latest" placeholder */
+          });
+      })();
+    </script>
+  </body>
+</html>
