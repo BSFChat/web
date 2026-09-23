@@ -10,12 +10,6 @@
     />
     <meta name="theme-color" content="#1e1f22" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -386,9 +380,17 @@
 
           <h2 id="voice">7. Voice and video calls</h2>
           <p>
-            Voice and video work on macOS, Windows, Linux and Android.
-            <strong>They are not available on iPhone yet</strong> &mdash; the
-            iPhone app is text-only, so nothing in this section applies to it.
+            Voice and camera video work on macOS, Windows, Linux, iPhone and
+            Android. <strong>Screen sharing is Android and desktop only</strong>
+            &mdash; the iPhone app cannot share your screen, so the parts of
+            this section about screen contents do not apply to it.
+          </p>
+          <p>
+            On iPhone, a call keeps running when you switch to another app or
+            lock the screen. That is what the microphone usage prompt is asking
+            about: while you are connected to a voice channel and not muted, the
+            microphone is live, foreground or background. Leaving the channel
+            stops it.
           </p>
           <p>
             <strong>Calls are peer-to-peer wherever possible, and that has a
@@ -634,14 +636,17 @@
 
           <h2>13. This website</h2>
           <p>
-            <code>bsfchat.com</code> sets no cookies, runs no analytics and shows
-            no banner because it has nothing to ask you about. Two honest
-            caveats: it is hosted on GitHub Pages, so GitHub receives your IP
-            address when you load it, and it loads its typeface from Google
-            Fonts, so Google does too. The download page also asks GitHub for the
-            latest release number.
-            <span class="review-flag">[owner]</span> Self-hosting the font would
-            remove the Google request entirely and is a ten-minute change.
+            <code>bsfchat.com</code> sets no cookies, runs no analytics, runs no
+            JavaScript at all, and shows no banner because it has nothing to ask
+            you about. Every file it serves &mdash; including its typeface
+            &mdash; comes from this one address. Loading a page here contacts no
+            third party.
+          </p>
+          <p>
+            The one caveat left: the site is hosted on GitHub Pages, so GitHub
+            operates the web server and receives your IP address the way any web
+            host would. Nothing else does. The download buttons are ordinary
+            links to GitHub &mdash; GitHub sees you only if you click one.
           </p>
 
           <h2>14. Changes to this policy</h2>
@@ -666,7 +671,7 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>&copy; <span id="year">2026</span> BSFChat contributors.</p>
+        <p>&copy; 2026 BSFChat contributors.</p>
         <p>
           <a href="/privacy">Privacy</a>
           &nbsp;·&nbsp;
@@ -679,8 +684,5 @@
       </div>
     </footer>
 
-    <script>
-      document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
   </body>
 </html>

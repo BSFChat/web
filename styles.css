@@ -1,5 +1,36 @@
 /* BSFChat landing — dark theme, no framework */
 
+/* Self-hosted, deliberately.
+ *
+ * This site tells visitors it does not track them, so it must not hand
+ * their IP address to a third party to render its own text. A
+ * <link href="fonts.googleapis.com"> does exactly that: every visitor's
+ * IP, User-Agent and Referer reach Google before a single word is
+ * drawn, which is also why a German court found embedded Google Fonts
+ * to be an unlawful transfer of personal data (LG München I, 3 O
+ * 17493/20). One 70 KB file served from our own origin removes the
+ * whole problem, and removes the round trip as well.
+ *
+ * Geist rather than Inter because it is the typeface the desktop and
+ * mobile clients already ship (client/qml/fonts/Geist-Variable.ttf), so
+ * the site and the app now look like the same product — and because it
+ * was already vetted and licensed in this project. SIL Open Font
+ * License 1.1; the licence text ships beside the font at
+ * /fonts/OFL.txt, which is what the OFL requires.
+ *
+ * One variable font covers every weight the site uses (400-700), so
+ * this is a single request, not four. font-display: swap keeps text
+ * visible while it loads; the system stack below is what renders in
+ * that window and is close enough in metrics not to reflow badly.
+ */
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg-0: #1e1f22;
   --bg-1: #2b2d31;
@@ -21,7 +52,7 @@ html, body {
   padding: 0;
   background: var(--bg-0);
   color: var(--text);
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;

@@ -27,6 +27,43 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      # The download tiles used to learn the current release tag from a
+      # fetch() in the visitor's browser. On a site that promises "no
+      # tracking" that was indefensible: it disclosed every visitor's IP
+      # address and User-Agent to a third party before they had clicked
+      # anything, and it did so to render our own text.
+      #
+      # The same information is substituted here instead — once, at
+      # deploy time, from a runner, using the token this workflow already
+      # has. The published page is then static bytes served from our own
+      # origin, and index.html contains no script at all.
+      #
+      # Deliberately best-effort: if the API call fails the placeholder
+      # falls back to "latest release", which is still true (the download
+      # links point at /releases/latest/download/, which GitHub resolves
+      # server-side). A stale tag or a missing one must never fail a
+      # deploy of the privacy policy the stores link to.
+      - name: Substitute the current release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          TAG=$(gh release view --repo BSFChat/client --json tagName \
+                  --jq .tagName 2>/dev/null || true)
+          if [ -z "$TAG" ]; then
+            TAG="latest release"
+            echo "::warning::Could not resolve the client's latest release tag;" \
+                 "falling back to a generic label."
+          fi
+          echo "Release label: $TAG"
+          # `sed -i ''` is the BSD form; the runner is GNU, so plain -i.
+          sed -i "s|@LATEST_TAG@|$TAG|g" index.html
+          if grep -q "@LATEST_TAG@" index.html; then
+            echo "::error::@LATEST_TAG@ survived substitution — the site would" \
+                 "publish a literal placeholder to visitors."
+            exit 1
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

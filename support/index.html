@@ -10,12 +10,6 @@
     />
     <meta name="theme-color" content="#1e1f22" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -234,9 +228,10 @@
             <strong>your settings → Voice</strong>.
           </p>
           <p>
-            <strong>On iPhone, voice and video are not available at all yet.</strong>
-            The iOS app is text-only for now. Voice works on macOS, Windows,
-            Linux and Android.
+            Voice and camera video work on macOS, Windows, Linux, iPhone and
+            Android. <strong>Screen sharing is not available on iPhone</strong>
+            &mdash; iOS has no equivalent of the desktop screen picker, and the
+            button is not shown there.
           </p>
           <h3>"I am not getting notifications on my iPhone"</h3>
           <p>
@@ -245,8 +240,16 @@
           </p>
           <h3>"Echo / people hear themselves"</h3>
           <p>
-            Use headphones. Acoustic echo cancellation is not implemented
-            everywhere yet, so an open speaker and an open microphone in the
+            On Mac and iPhone, BSFChat uses the system's voice-processing audio
+            unit, which cancels echo, suppresses noise and rides the gain. It is
+            on by default and can be turned off in
+            <strong>your settings &rarr; Audio &rarr; Echo cancellation</strong>
+            if it does something you do not want. On Android the phone's own
+            communication-mode processing does the same job.
+          </p>
+          <p>
+            <strong>On Windows and Linux there is no echo cancellation.</strong>
+            Use headphones there: an open speaker and an open microphone in the
             same room will feed back.
           </p>
 
@@ -264,7 +267,7 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>&copy; <span id="year">2026</span> BSFChat contributors.</p>
+        <p>&copy; 2026 BSFChat contributors.</p>
         <p>
           <a href="/privacy">Privacy</a>
           &nbsp;·&nbsp;
@@ -277,8 +280,5 @@
       </div>
     </footer>
 
-    <script>
-      document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
   </body>
 </html>

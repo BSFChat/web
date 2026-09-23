@@ -10,12 +10,6 @@
     />
     <meta name="theme-color" content="#1e1f22" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -101,7 +95,7 @@
             >
               <h3>macOS</h3>
               <p class="download-file">BSFChat-macOS.dmg</p>
-              <p class="download-version" data-version>latest</p>
+              <p class="download-version">@LATEST_TAG@</p>
             </a>
             <a
               class="tile tile-link download-tile"
@@ -110,7 +104,7 @@
             >
               <h3>Windows</h3>
               <p class="download-file">BSFChat-Setup.exe</p>
-              <p class="download-version" data-version>latest</p>
+              <p class="download-version">@LATEST_TAG@</p>
             </a>
             <a
               class="tile tile-link download-tile"
@@ -119,7 +113,7 @@
             >
               <h3>Linux</h3>
               <p class="download-file">BSFChat-linux-x86_64.tar.gz</p>
-              <p class="download-version" data-version>latest</p>
+              <p class="download-version">@LATEST_TAG@</p>
             </a>
           </div>
           <p class="download-meta">
@@ -169,7 +163,7 @@
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <p>&copy; <span id="year">2026</span> BSFChat contributors.</p>
+        <p>&copy; 2026 BSFChat contributors.</p>
         <p>
           <a href="/privacy">Privacy</a>
           &nbsp;·&nbsp;
@@ -182,30 +176,18 @@
       </div>
     </footer>
 
-    <script>
-      document.getElementById("year").textContent = new Date().getFullYear();
+    <!--
+      No script on this page any more, deliberately.
 
-      (function injectVersion() {
-        var nodes = document.querySelectorAll("[data-version]");
-        if (!nodes.length || typeof fetch !== "function") return;
-        fetch("https://api.github.com/repos/BSFChat/client/releases/latest", {
-          headers: { Accept: "application/vnd.github+json" }
-        })
-          .then(function (r) {
-            if (!r.ok) throw new Error("bad status " + r.status);
-            return r.json();
-          })
-          .then(function (data) {
-            var tag = (data && data.tag_name) || "";
-            if (!tag) return;
-            nodes.forEach(function (n) {
-              n.textContent = tag;
-            });
-          })
-          .catch(function () {
-            /* keep the "latest" placeholder */
-          });
-      })();
-    </script>
+      The version labels used to be filled in by a browser-side fetch of
+      the GitHub releases API. That handed every visitor's IP address and
+      User-Agent to a third party before they had clicked anything, on a
+      site whose entire pitch is "no tracking". The tag is substituted at
+      deploy time instead (see .github/workflows/deploy.yml), so what the
+      browser receives is static bytes from this origin and nothing else.
+
+      The copyright year is baked in rather than computed from the
+      visitor's clock, which was the only other reason for script here.
+    -->
   </body>
 </html>
