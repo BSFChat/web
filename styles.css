@@ -9,6 +9,7 @@
   --accent: #5865f2;
   --accent-hover: #4752c4;
   --border: rgba(255, 255, 255, 0.06);
+  --warn: #faa61a;
   --radius: 12px;
   --max: 1040px;
 }
@@ -187,7 +188,10 @@ p { color: var(--text-muted); margin: 0 0 1rem; }
 
 /* Responsive */
 @media (max-width: 540px) {
-  .site-nav { gap: 0.9rem; font-size: 0.9rem; }
+  /* Four nav links no longer fit beside the wordmark, so let the nav drop
+     to its own line rather than letting the last one clip off the edge. */
+  .header-inner { flex-wrap: wrap; row-gap: 0.5rem; }
+  .site-nav { gap: 0.9rem; font-size: 0.9rem; flex-wrap: wrap; }
   section { padding: 3rem 0; }
   .hero { padding: 3.5rem 0 3rem; }
 }
@@ -253,12 +257,12 @@ html { scroll-behavior: smooth; }
   color: var(--text);
 }
 
-.doc-note-review { border-left-color: #faa61a; }
+.doc-note-review { border-left-color: var(--warn); }
 .doc-note-review h2 { font-size: 1.1rem; }
 
 /* Inline marker for a sentence the owner must confirm before publishing. */
 .review-flag {
-  color: #faa61a;
+  color: var(--warn);
   font-weight: 600;
   font-size: 0.85em;
   letter-spacing: 0.02em;
