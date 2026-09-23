@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — BSFChat</title>
+    <meta
+      name="description"
+      content="What BSFChat collects, what it deliberately does not, and where it all goes. No analytics, no crash reporting, no ads, no tracking — and a plain explanation of what self-hosting means for your data."
+    />
+    <meta name="theme-color" content="#1e1f22" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">
+          <span class="brand-glyph" aria-hidden="true">B</span>
+          <span class="brand-word">BSFChat</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/#features">Features</a>
+          <a href="/#download">Download</a>
+          <a href="/support">Support</a>
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="doc">
+        <div class="container">
+          <h1>Privacy Policy</h1>
+          <p class="doc-meta">
+            Last updated 23 September 2026 &middot; applies to the BSFChat apps
+            for macOS, Windows, Linux, iPhone and Android, and to the servers we
+            run at <code>bsfchat.com</code>
+          </p>
+
+          <div class="doc-note doc-note-review">
+            <h2>Owner: read this before publishing</h2>
+            <p>
+              <strong>An AI assistant wrote this policy by reading the BSFChat
+              source.</strong> Every factual claim in it was checked against the
+              code in <code>client</code>, <code>server</code>,
+              <code>identity</code> and <code>deploy</code> — but no human has
+              confirmed it, and a privacy policy is a promise to strangers and a
+              legal document in several countries. <strong>Read it end to
+              end.</strong>
+            </p>
+            <p>The parts that are <em>not</em> facts about the code, and that only you can settle:</p>
+            <ul>
+              <li>
+                <strong>Who the data controller is</strong> (section 1) — your
+                name or company, and an address if you need one for UK/EU
+                purposes. Placeholder now.
+              </li>
+              <li>
+                <strong><code>support@bsfchat.com</code> does not exist yet.</strong>
+                It is cited as the contact route throughout, and both app stores
+                will email it. Create it first.
+              </li>
+              <li>
+                <strong>Log retention on the production host</strong> (section
+                9) — nginx's access log keeps full IP addresses and the box
+                currently has whatever your distro's default logrotate does. The
+                policy states 14 days. Either make that true, or change the
+                number.
+              </li>
+              <li>
+                <strong>Backup retention</strong> (section 9) — same. The policy
+                says 30 days; <code>deploy/backup.sh</code> has no schedule and
+                no retention policy at all.
+              </li>
+              <li>
+                <strong>The age in section 11</strong> must match what you
+                declare in App Store Connect and the Play Console, and what
+                <a href="/terms">the terms</a> say.
+              </li>
+              <li>
+                <strong>Section 6 says we will delete an identity account on
+                request.</strong> There is no code that does this — today it is
+                a manual database operation. It is still the honest answer, but
+                you are committing to doing it by hand.
+              </li>
+            </ul>
+            <p>
+              Two things this policy says that you may be tempted to soften.
+              Please do not: <strong>message history survives account
+              deletion</strong> (section 10), and <strong>nothing on the server
+              is encrypted at rest</strong> (section 9). Both are true, both are
+              unusual to admit, and a policy that contradicts the code is worse
+              than no policy.
+            </p>
+            <p>Delete this box before publishing.</p>
+          </div>
+
+          <h2>The short version</h2>
+          <p>
+            BSFChat contains <strong>no analytics, no telemetry, no crash
+            reporting, no advertising and no tracking of any kind</strong>. Not
+            "anonymised" analytics. Not "essential" analytics. None. There is no
+            third-party SDK in the apps at all — no Firebase, no Google Play
+            Services, no Crashlytics, no Sentry, no ad network, no attribution
+            library. Nothing in the app reports back to us about what you do
+            with it, and there is no server anywhere that we could read such
+            reports from.
+          </p>
+          <p>
+            What is left is the data a chat program cannot work without: your
+            name, your messages, the files you send, and who you send them to.
+            This policy is mostly about where that goes — and the answer, unusually,
+            is <em>probably not to us</em>.
+          </p>
+
+          <h2 id="self-hosting">1. Who actually holds your data</h2>
+          <p>
+            This is the most important section and it is the one that does not
+            fit the boxes on an app store form, so it gets prose.
+          </p>
+          <p>
+            <strong>BSFChat is self-hosted software.</strong> The app on your
+            device is a client. Your messages live on a <em>server</em>, and
+            that server is a program someone downloaded and ran &mdash; on a
+            rented box, in a company rack, on a Raspberry Pi in a spare room, or
+            on the same laptop the app is running on. When you sign in to a
+            server, you are trusting whoever runs <em>that</em> server. That
+            person is usually not us.
+          </p>
+          <p>
+            We have no central service that your messages pass through. There is
+            no BSFChat cloud. We cannot read, copy, index, moderate or delete
+            anything on a server we do not operate, and in the ordinary case we
+            do not know that the server exists.
+          </p>
+          <p>
+            We <em>do</em> run three things, and only for these are we the data
+            controller:
+          </p>
+          <div class="doc-table-wrap">
+            <table>
+              <thead>
+                <tr><th>What we run</th><th>What it is</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>chat.bsfchat.com</code></td>
+                  <td>One public chat server. One instance among many, not a hub.</td>
+                </tr>
+                <tr>
+                  <td><code>id.bsfchat.com</code></td>
+                  <td>
+                    The default sign-in provider (&ldquo;BSFChat ID&rdquo;). Optional
+                    &mdash; a server can use a different provider, or plain
+                    username-and-password accounts with no identity provider at all.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>bsfchat.com</code></td>
+                  <td>This website.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Throughout this policy, <strong>&ldquo;we&rdquo; and
+            &ldquo;our servers&rdquo; mean only those three.</strong> Where a
+            section describes the server software generally, it is telling you
+            what <em>any</em> BSFChat server does &mdash; so you know what to ask
+            the person who runs yours.
+          </p>
+          <p>
+            <span class="review-flag">[owner: legal name / entity here]</span> is
+            the controller for our servers, contactable at
+            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a>.
+          </p>
+
+          <h2>2. What we do not collect</h2>
+          <p>
+            Stated plainly, because it is the whole point of the product and
+            because it is checkable &mdash; the source is public and none of
+            these words appear in it except in comments explaining their
+            absence.
+          </p>
+          <ul class="doc-nope">
+            <li><strong>No analytics or telemetry.</strong> The app never reports feature usage, session length, screen views, button presses or anything else.</li>
+            <li><strong>No crash reporting.</strong> There is no crash reporter in the app. If it crashes, we find out because you tell us.</li>
+            <li><strong>No advertising and no ad identifiers.</strong> No IDFA, no Android Advertising ID, no ad SDK, no ad network, and no plan to add one.</li>
+            <li><strong>No third-party SDKs at all.</strong> Not one, on either mobile platform.</li>
+            <li><strong>No device identifiers.</strong> The app never reads your device's serial, IDFA, Android ID or vendor identifier, and never generates a persistent identifier of its own to track you with.</li>
+            <li><strong>No location.</strong> No GPS, no location permission, no IP-based geolocation, no mDNS or Bonjour discovery.</li>
+            <li><strong>No contacts, no photo library, no calendar, no microphone-when-idle.</strong> The app has no photo-library permission at all: attachments come from the system file picker.</li>
+            <li><strong>No read receipts sent to other people.</strong> The app never tells anybody that you read their message.</li>
+            <li><strong>No profiling, no automated decision-making, no advertising or marketing use of anything here, and no sale of data to anyone, ever.</strong></li>
+            <li><strong>No AI training on your messages.</strong> We do not have your messages, and we would not do it if we did.</li>
+          </ul>
+          <p>
+            One thing the apps do that is <em>not</em> tracking but is a network
+            call, so it belongs here: the <strong>desktop</strong> apps check
+            GitHub for a new release, at most once every six hours, and you can
+            turn that off in settings. It sends nothing about you &mdash; GitHub
+            sees an IP address, as any web request does. <strong>This is
+            compiled out of the iPhone and Android apps entirely</strong>, because
+            the stores handle updates there.
+          </p>
+
+          <h2>3. What the app stores on your own device</h2>
+          <p>
+            All of this stays on your device. None of it is sent anywhere.
+          </p>
+          <ul>
+            <li>Your sign-in tokens, your user ID, device ID, display name and the server addresses you have added.</li>
+            <li>A local cache of recent messages and rooms, so the app opens instantly instead of re-downloading everything.</li>
+            <li>Downloaded and viewed attachments, in the app's own cache folder.</li>
+            <li>Your settings: theme, audio devices, per-person volume, notification preferences.</li>
+            <li>A rotating local log file (5&nbsp;MB, three files) for debugging. It never contains message text or tokens.</li>
+          </ul>
+          <p>
+            <strong>Being precise about how this is protected:</strong> it is
+            stored in the app's private, OS-sandboxed storage &mdash; on iPhone
+            and Android, in the app container that other apps cannot read. It is
+            <strong>not</strong> in the iOS Keychain or the Android Keystore, and
+            the app does not add encryption of its own on top of the operating
+            system's. On Android, automatic Google Drive backup of the app's data
+            is explicitly disabled so your sign-in tokens are never copied to
+            Google's servers.
+          </p>
+          <p>
+            Signing out, or deleting the app, removes all of it.
+          </p>
+
+          <h2>4. What a chat server stores</h2>
+          <p>
+            This describes the BSFChat server software, so it is equally true of
+            <code>chat.bsfchat.com</code> and of a server your friend runs.
+          </p>
+          <div class="doc-table-wrap">
+            <table>
+              <thead>
+                <tr><th>What</th><th>Detail</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Your account</td>
+                  <td>
+                    A user ID the server issues (like
+                    <code>@you:chat.bsfchat.com</code>), your display name, your
+                    per-server nickname if you set one, your avatar, when the
+                    account was created, and &mdash; if it is a password account
+                    rather than a BSFChat ID &mdash; a hash of your password.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Devices</td>
+                  <td>
+                    A device ID per sign-in, issued by the server. Not a hardware
+                    identifier: it identifies a session, not your phone.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Messages</td>
+                  <td>
+                    Everything you send, with who sent it, where, and when. Also
+                    edits, edit history, reactions, replies, threads and mentions.
+                    <strong>Stored in plain text</strong> &mdash; see section 9.
+                    A second copy of each message body sits in the server's search
+                    index.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Attachments and avatars</td>
+                  <td>
+                    The file itself, stored on the server's disk exactly as you
+                    uploaded it, plus its filename, size and type and the fact that
+                    you uploaded it. <strong>Metadata inside the file is not
+                    stripped</strong> &mdash; if you upload a photo straight from a
+                    camera, any GPS coordinates and camera details it contains are
+                    preserved and travel with it.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Membership</td>
+                  <td>Which channels and direct messages you are in, and when that changed.</td>
+                </tr>
+                <tr>
+                  <td>Your reading position</td>
+                  <td>How far you have read in each channel, so unread badges work. It is never shown to anyone else.</td>
+                </tr>
+                <tr>
+                  <td>Presence and typing</td>
+                  <td>Whether you are online and whether you are typing. Held in memory only, expires in about two and a half minutes, never written to disk.</td>
+                </tr>
+                <tr>
+                  <td>Sign-in tokens</td>
+                  <td>Stored hashed, so a copy of the database is not a set of working logins. Ninety-day sliding expiry.</td>
+                </tr>
+                <tr>
+                  <td>Moderation records</td>
+                  <td>Bans, and an append-only audit log of administrative actions. See section 8 for blocks and reports.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <strong>Your IP address is not written to the chat server's
+            database.</strong> Not on login, not on any request, not in any
+            table. It is held in the running process's memory for a few minutes
+            to rate-limit sign-in attempts, and then gone. This is a deliberate
+            design decision, not an accident of implementation. Where IP
+            addresses <em>do</em> survive on our own deployment is the web-server
+            log &mdash; section 9.
+          </p>
+          <p>
+            <strong>Messages are not end-to-end encrypted.</strong> We will not
+            imply otherwise. Traffic between the app and the server is protected
+            by TLS, and on our deployment the connection is HTTPS throughout. But
+            the server can read what passes through it, and so can whoever
+            administers it. If you need end-to-end encryption, BSFChat does not
+            currently provide it.
+          </p>
+          <p>
+            <strong>Your messages are never sent to another server.</strong> The
+            server does not federate: there is no code path by which your
+            messages leave the server you sent them to.
+          </p>
+
+          <h2>5. Push notifications</h2>
+          <p>
+            <strong>There are none.</strong> BSFChat has no Apple Push
+            Notification or Firebase Cloud Messaging integration, and our server
+            is not configured with a push gateway. This means no notification
+            content is ever handed to Apple or Google &mdash; and it also means
+            the iPhone app only shows you new messages while it is open. Android
+            keeps a background connection to your server and notifies you
+            locally, on your own device, with no third party involved.
+          </p>
+
+          <h2 id="identity">6. The BSFChat ID sign-in service</h2>
+          <p>
+            If you sign in with a BSFChat ID, <code>id.bsfchat.com</code> holds
+            a separate, small account record:
+          </p>
+          <ul>
+            <li>Your username and a hash of your password.</li>
+            <li>Your display name and avatar URL.</li>
+            <li>
+              <strong>An email address, only if you chose to give one.</strong>
+              It is optional, it is never verified, and
+              <strong>nothing is ever sent to it</strong> &mdash; the service has
+              no email capability whatsoever. There is no password reset by
+              email. Give one only if you want it shown on your profile.
+            </li>
+            <li>Your two-factor secret, if you turned two-factor on.</li>
+            <li>Which BSFChat servers you have signed in to, and when.</li>
+            <li>Active sessions: when created, when they expire. <strong>No IP address, no browser, no device information is recorded against a session.</strong></li>
+          </ul>
+          <p>
+            Sign-in uses the standard OpenID Connect flow in your real browser
+            (Apple's secure web sign-in sheet on iPhone, your browser on Android
+            and desktop) &mdash; never an embedded web view that could read what
+            you type. The token a chat server receives is bound to that one
+            server's address and lives five minutes. Your email address is only
+            ever included in it if the server asked for it and you agreed.
+          </p>
+          <p>
+            The identity service makes no outbound network calls of any kind. It
+            has no analytics, no logging of your email or username on failure,
+            and IP addresses appear in its logs only truncated to a network
+            range.
+          </p>
+          <p>
+            <strong>Deleting a BSFChat ID.</strong> The &ldquo;Delete
+            account&rdquo; button in the app deletes your account on the
+            <em>chat server</em>. It does not yet delete your BSFChat ID; there
+            is no button for that. Email
+            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a> and we
+            will remove it by hand.
+          </p>
+
+          <h2 id="voice">7. Voice and video calls</h2>
+          <p>
+            Voice and video work on macOS, Windows, Linux and Android.
+            <strong>They are not available on iPhone yet</strong> &mdash; the
+            iPhone app is text-only, so nothing in this section applies to it.
+          </p>
+          <p>
+            <strong>Calls are peer-to-peer wherever possible, and that has a
+            privacy consequence you should know about.</strong> When your
+            connection goes directly to the other people in the call, the media
+            never touches a server &mdash; which is good &mdash; but
+            <strong>the other participants' devices learn your IP
+            address</strong>, and yours learns theirs. That is inherent to how
+            direct connections work, not a flaw in BSFChat, and every
+            peer-to-peer voice app behaves this way.
+          </p>
+          <p>
+            If you do not want that, turn on <strong>&ldquo;Hide my IP
+            address&rdquo;</strong> in the voice settings. Every call is then
+            forced through a relay server, so other participants see the relay's
+            address rather than yours. If the setting is on and no relay is
+            available, <strong>the call is refused rather than quietly
+            connected directly</strong> &mdash; a privacy setting that silently
+            stops working is worse than useless.
+          </p>
+          <p>
+            <strong>What the relay sees.</strong> A relay (a standard TURN
+            server; ours runs alongside <code>chat.bsfchat.com</code>) forwards
+            encrypted packets. It cannot hear your call or see your video. It
+            does see both ends' IP addresses, how much data flowed and for how
+            long, and the credential it was given, which contains your user ID.
+            Relay credentials are issued by your chat server, are unique to you,
+            and expire after an hour.
+          </p>
+          <p>
+            <strong>Call media is encrypted between participants</strong> using
+            the standard WebRTC mechanisms &mdash; DTLS for audio, DTLS-keyed
+            SRTP for video. <strong>This is not end-to-end encryption</strong>
+            in the sense the phrase usually carries: there is no verification
+            that the person you are talking to is who they claim, and no forward
+            secrecy. We will not describe it as E2EE and neither should anyone
+            else.
+          </p>
+          <p>
+            The signalling messages that set a call up briefly contain network
+            addresses. They are delivered only to the person on the other end of
+            the call, are never included in channel history or search, and are
+            deleted from the server about two minutes later.
+          </p>
+
+          <h2>8. Blocking, reporting, and links</h2>
+          <h3>Blocking</h3>
+          <p>
+            Your block list is stored on your chat server against your account,
+            so it follows you to every device. The server does the filtering.
+            <strong>A blocked person is never told</strong> &mdash; their
+            messages and invitations are simply dropped on the way to you, which
+            means they cannot detect the block by watching what happens.
+          </p>
+          <h3>Reporting</h3>
+          <p>
+            When you report a message or a user, the server records who reported
+            it, who was reported, where, the reason you wrote, and
+            <strong>a copy of the reported message</strong> &mdash; kept
+            deliberately, so that deleting the message does not destroy the
+            evidence. Reports are readable only by administrators of that server.
+            The reported person is not notified. On our server, reports come to
+            us; on someone else's, they go to them, and we never see them.
+          </p>
+          <p>
+            Reports are kept as a moderation record and are not deleted when the
+            reported account is.
+          </p>
+          <h3>Link previews</h3>
+          <p>
+            When somebody posts a link in a channel, <strong>your device fetches
+            that page directly</strong> to show a preview &mdash; the request
+            comes from you, not from the server. The site being linked therefore
+            sees your IP address and that someone opened its page. For YouTube
+            links this includes a request to YouTube (Google) for the title and
+            thumbnail. This applies to any link anyone posts, so treat a link from
+            someone you do not trust with the same caution you would in a browser.
+          </p>
+
+          <h2 id="security">9. How it is protected, honestly</h2>
+          <p>
+            <strong>Passwords are hashed properly.</strong> BSFChat ID passwords
+            use PBKDF2-HMAC-SHA256 at 600,000 iterations with a 128-bit random
+            salt &mdash; the current OWASP recommendation. Chat-server passwords
+            use the same algorithm at 524,288 iterations. Nobody, including us,
+            can read your password out of a database.
+          </p>
+          <p>
+            <strong>Sign-in tokens are stored hashed</strong> on both services,
+            so a stolen database backup is not a set of working logins.
+          </p>
+          <p>
+            <strong>Everything else on a chat server is stored unencrypted, and
+            you should know that.</strong> The database holds every message in
+            plain text, plus a second copy of each message in the search index.
+            Uploaded files sit on disk as files. There is no database passphrase.
+            Anyone who can read the server's disk &mdash; its administrator, a
+            support engineer at its hosting provider, anyone who steals a backup
+            &mdash; can read everything on it. This is true of most chat servers;
+            it is simply not usually written down. On our own deployment the
+            countermeasures are ordinary ones: the database is owner-readable
+            only, deleted rows are overwritten rather than merely unlinked, and
+            backups are written with restrictive permissions.
+          </p>
+          <p>
+            <strong>Attachments are access-controlled.</strong> Downloading a
+            file requires a valid sign-in and membership of a channel where that
+            file was posted &mdash; a link on its own is not enough. A refusal is
+            indistinguishable from the file not existing, so the URL cannot be
+            used to probe for content.
+          </p>
+          <p>
+            <strong>Our web server's logs.</strong> On
+            <code>chat.bsfchat.com</code> and <code>id.bsfchat.com</code>, nginx
+            sits in front and writes an access log containing your IP address,
+            the time, the request path, the response status and your app's
+            user-agent string. Sign-in tokens are stripped from the logged URL.
+            This log is the one place your full IP address is written down, and
+            it exists for security and debugging.
+            <span class="review-flag">[owner: confirm]</span> It is rotated and
+            deleted after 14 days.
+          </p>
+          <p>
+            <strong>Backups.</strong> We back up
+            <code>chat.bsfchat.com</code> and <code>id.bsfchat.com</code>. A
+            backup contains everything described in section 4, in plain text.
+            <span class="review-flag">[owner: confirm]</span> Backups are kept for
+            30 days and then destroyed. This is why deletion, in section 10, is
+            described as taking up to a month to become complete.
+          </p>
+          <p>
+            <strong>No security is perfect.</strong> This is a small project. If
+            you find a hole, please tell us at
+            <a href="mailto:security@bsfchat.com">security@bsfchat.com</a>.
+          </p>
+
+          <h2 id="retention">10. How long things are kept, and deleting your account</h2>
+          <h3>Retention</h3>
+          <ul>
+            <li><strong>Messages and attachments: indefinitely</strong>, until somebody deletes them. There is no automatic expiry and no "messages older than X are purged" setting. A chat server is an archive by default.</li>
+            <li><strong>Deleted messages:</strong> deleting a message empties its content on the server, removes it from search, cancels any pending notification carrying its text, and revokes access to any file it linked. The old bytes are overwritten rather than just unlinked.</li>
+            <li><strong>Presence and typing:</strong> seconds to minutes, memory only.</li>
+            <li><strong>Call signalling:</strong> about two minutes.</li>
+            <li><strong>Rate-limiting records:</strong> minutes, memory only.</li>
+            <li><strong>Administrative audit log:</strong> kept permanently and cannot be edited or deleted, by design &mdash; it is the record of what administrators did, including to you.</li>
+          </ul>
+          <h3 id="deletion">Deleting your account</h3>
+          <p>
+            There is a <strong>Delete account</strong> button in the app, in your
+            settings below Log out. You must type your username, and your
+            password, to confirm it. It is immediate and it cannot be undone.
+          </p>
+          <p><strong>What it does:</strong></p>
+          <ul>
+            <li>Destroys your password and every sign-in token, everywhere. You are signed out on every device and cannot sign in again.</li>
+            <li>Erases your display name, nickname and avatar from your account.</li>
+            <li>Removes you from every channel and direct message.</li>
+            <li>Deletes your block list, your notification settings and your reading positions.</li>
+            <li>Unlinks your BSFChat ID from that server.</li>
+          </ul>
+          <p>
+            <strong>What it does not do, and you deserve to be told this before
+            you press it rather than after:</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>The messages you have sent stay where you sent them.</strong>
+              They remain in their channels, readable and searchable by the people
+              who were in those conversations. This is deliberate. A conversation
+              belongs to everyone in it, and deleting your account cannot mean
+              silently cutting holes in other people's history. If you want
+              particular messages gone, delete them individually
+              <em>before</em> you delete your account.
+            </li>
+            <li>
+              <strong>Your old display name and avatar remain visible in that
+              history</strong>, because they are recorded inside the join and
+              membership events already written into each channel.
+            </li>
+            <li>
+              <strong>Files you uploaded are not deleted</strong>, because they
+              are attached to those same messages. Your avatar image is the
+              exception and is cleaned up.
+            </li>
+            <li>
+              <strong>Your username can never be used again</strong>, by you or
+              anybody else. A deleted account's ID is permanently retired so that
+              nobody can register it and appear to be you in old conversations.
+            </li>
+            <li>
+              <strong>Reports and audit records mentioning you survive</strong>,
+              as moderation records.
+            </li>
+            <li>
+              <strong>Backups still contain everything</strong> until they age
+              out, as described in section 9.
+            </li>
+          </ul>
+          <p>
+            If you want more than this from a server we run &mdash; a particular
+            message gone, a file removed &mdash; email
+            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a> and we
+            will do what we can. On a server we do not run, ask its
+            administrator; we have no access.
+          </p>
+
+          <h2>11. Children</h2>
+          <p>
+            BSFChat is not for children. You must be at least
+            <strong>13</strong>, or <strong>16</strong> in the United Kingdom and
+            the European Economic Area. We do not knowingly hold accounts for
+            anyone younger, we do not ask for a date of birth, and we do not
+            collect anything designed to be attractive to or targeted at
+            children. If you believe a child has an account on a server we run,
+            email <a href="mailto:support@bsfchat.com">support@bsfchat.com</a>
+            and we will remove it.
+          </p>
+
+          <h2>12. Your rights</h2>
+          <p>
+            If you are in the UK or the EU, you have the right to access a copy
+            of your data, correct it, have it deleted, restrict or object to how
+            it is used, and take it elsewhere. If you are in California or a US
+            state with a similar law, you have comparable rights, and we do not
+            sell or share personal information for advertising &mdash; there is no
+            advertising.
+          </p>
+          <p>
+            For a server we run, email
+            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a> and we
+            will answer within 30 days. Please note the honest limits above:
+            deletion works as section 10 describes and not otherwise.
+          </p>
+          <p>
+            For a server we do not run, we cannot help. Its operator is your data
+            controller, not us.
+          </p>
+          <p>
+            Our legal basis for handling data on our servers is performance of
+            the contract with you (running the service you signed up for) and our
+            legitimate interest in keeping it secure and free of abuse.
+          </p>
+
+          <h2>13. This website</h2>
+          <p>
+            <code>bsfchat.com</code> sets no cookies, runs no analytics and shows
+            no banner because it has nothing to ask you about. Two honest
+            caveats: it is hosted on GitHub Pages, so GitHub receives your IP
+            address when you load it, and it loads its typeface from Google
+            Fonts, so Google does too. The download page also asks GitHub for the
+            latest release number.
+            <span class="review-flag">[owner]</span> Self-hosting the font would
+            remove the Google request entirely and is a ten-minute change.
+          </p>
+
+          <h2>14. Changes to this policy</h2>
+          <p>
+            If we change it, the date at the top changes and we will say what
+            changed. If a change is significant &mdash; if we started collecting
+            something we do not collect today &mdash; we will tell you in the app
+            before it takes effect, not quietly in a footer.
+          </p>
+
+          <h2>15. Contact</h2>
+          <p>
+            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a> for
+            anything in this policy, including data requests.
+            <a href="mailto:security@bsfchat.com">security@bsfchat.com</a> for
+            vulnerabilities. See also the <a href="/terms">terms of service</a>
+            and the <a href="/support">support page</a>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; <span id="year">2026</span> BSFChat contributors.</p>
+        <p>
+          <a href="/privacy">Privacy</a>
+          &nbsp;·&nbsp;
+          <a href="/terms">Terms</a>
+          &nbsp;·&nbsp;
+          <a href="/support">Support</a>
+          &nbsp;·&nbsp;
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
