@@ -4,11 +4,21 @@
 not part of the site and is not linked from anywhere. It is working material for
 filling in App Store Connect and the Google Play Console.
 
-**Drafted by an AI assistant on 2026-09-23** by reading `client`, `server`,
-`identity` and `deploy`. Everything factual in it was checked against code, and
-the checks are cited so you can re-run them. Everything that is a *decision* —
-pricing, entity name, age rating appeal, whether to ship iOS without voice — is
-yours and is marked.
+**Drafted by an AI assistant on 2026-09-23, then reviewed and substantially
+corrected by a second one the same day.** Both read `client`, `server`,
+`identity` and `deploy`; every factual claim is cited so you can re-run the
+check. Everything that is a *decision* — pricing, entity name, licence, age
+rating appeal — is yours and is marked **[owner: decide]**.
+
+**What the second pass changed, in case you read the first one:** the App Store
+copy was written for a text-only client, because iOS voice was off in the tree
+it was read from. Voice is now on by default and has run on a real iPhone, so
+§0.1, §0.2, §1.3, §1.4, §4.1, §4.2, §5.1 and §6 have all been rewritten. The
+blocker list changed too: the *client* side of block/report/delete is merged,
+but the *server* side of reporting is not, and that is now the only hard gate
+(§0.3). The licence question is written up as a decision with a recommendation
+(§0.6) rather than settled unilaterally. Play needs four foreground-service
+declarations, not three (§0.7).
 
 Companion pages, all on branch `docs/store-submission` in this repo:
 
@@ -25,61 +35,108 @@ Companion pages, all on branch `docs/store-submission` in this repo:
 
 Ordered by how likely it is to cost you a review cycle.
 
-### 0.1 iOS has no voice. None. (highest risk)
+### 0.1 iOS voice: this file used to say there was none. There is. (read this first)
 
-You told me "iOS voice works but echo cancellation is not yet implemented."
-**The code says otherwise, and the difference matters for your listing.**
+**Superseded on 2026-09-23.** An earlier draft of this document opened with
+"iOS has no voice. None." and wrote the entire App Store listing around a
+text-only client. That was true of the tree it was read from. It is not true of
+the tree you are shipping, and every piece of iOS copy that follows has been
+rewritten accordingly.
 
-`client/CMakeLists.txt:24-25`
+What the integration branch actually does (`wt/integrate`, HEAD `1121acf`):
 
-```cmake
-if(IOS)
-    option(BSFCHAT_ENABLE_VOICE "Enable voice chat (requires libdatachannel + opus)" OFF)
-```
-
-`src/main.cpp:274` gates the entire voice wiring on
-`defined(BSFCHAT_VOICE_ENABLED) && !defined(Q_OS_IOS)`, and the iOS CI job
-(`.github/workflows/ci.yml:1420`) does not pass `-DBSFCHAT_ENABLE_VOICE=ON`.
-Nothing in the tree configures `AVAudioSession`, and `UIBackgroundModes` is
-deliberately absent.
-
-**The first TestFlight build is a text-chat client.** If the App Store
-description, subtitle, keywords or screenshots mention voice, video or screen
-sharing, that is a **guideline 2.3.1 (accurate metadata)** rejection, and it is
-the kind reviewers catch reliably because they will look for the button.
-
-The iOS copy below therefore never mentions voice. Do not add it back.
-
-### 0.2 Echo cancellation — the real picture
-
-There is **no software AEC anywhere in the client**, on any platform. Grepped
-`AEC|VoiceProcessingIO|kAudioUnitSubType_VoiceProcessing|AcousticEcho|APM|noise suppress`;
-every hit is a comment explaining the absence, and `src/voice/VoiceGain.h:25-60`
-states it outright.
-
-| Platform | Voice | Echo cancellation |
+| Was claimed | Actually | Evidence |
 | --- | --- | --- |
-| macOS / Windows / Linux | yes | none — headphones required in practice |
-| Android | yes | platform/hardware AEC only, via `MODE_IN_COMMUNICATION` (`src/voice/AndroidAudioRouting.h`), **not yet verified on a real device** |
-| iOS | **not built** | n/a |
+| `BSFCHAT_ENABLE_VOICE` is `OFF` for iOS | **`ON`**, by default | `CMakeLists.txt:57-59`, rationale at `:19-30` ("built, installed and USED on a real iPhone 16 Pro Max") |
+| voice wiring is gated on `!defined(Q_OS_IOS)` | that guard covers only the **media-state announcement** block, which needs the `screenShare` object iOS does not have | `src/main.cpp:284`; the voice and camera wiring at `:271-283` has no iOS exclusion |
+| nothing configures `AVAudioSession` | `playAndRecord` / `voiceChat` / `defaultToSpeaker`, plus interruption and route-change recovery | `src/voice/IosAudioSession.mm:128-170`, `:65-112` |
+| `UIBackgroundModes` is deliberately absent | emitted as `audio` whenever voice is on, which it now is | `CMakeLists.txt:676-685` → `ios/Info.plist.in:207` |
+| the iOS CI job does not pass `-DBSFCHAT_ENABLE_VOICE=ON` | true, and deliberate — it passes **no** flag so CI builds the same default configuration a release does | `.github/workflows/ci.yml:1419-1425` |
 
-Consequence for the Play listing: do not claim "crystal-clear" or
-"echo-free" voice. The copy below says voice works and leaves it there.
+**So the first TestFlight build is a voice-capable client.** Consequences, and
+they cut the opposite way from the old advice:
 
-### 0.3 Blocking, reporting and account deletion are on unmerged branches
+- The description, screenshots and review notes **should** mention voice and
+  camera video. Saying "no voice on iPhone" while the binary contains a
+  microphone prompt, an active `AVAudioSession` and `UIBackgroundModes: audio`
+  is the same 2.3.1 accurate-metadata problem in reverse — and the background
+  mode is exactly the thing a reviewer opens the Info.plist to check.
+- **Screen sharing still does not exist on iOS.** `src/main.cpp:259-270` builds
+  `AndroidScreenShareController` on Android only; there is no iOS equivalent.
+  Do not put screen sharing in the Apple copy, do not screenshot it, and do not
+  let the Play copy and the Apple copy be unified.
+- The App Store screenshot set **should** now include a voice channel. See §8.
 
-You said these were on `server` main. They are not.
+### 0.2 Echo cancellation — implemented on Apple, never heard on a device
 
-- `server` main is `295156f`. The feature is `d5d0fe6` on **`feat/ugc-safety`**.
-- `client` main is `ada5998`. The UI is `f7b806e` on **`feat/ugc-safety-ui`**.
-- The integration state that has everything (plus Play/App Store prep and the
-  mobile UI work) is the worktree **`wt/android-verify`**, detached at `2c8c857`
-  = `origin/feat/mobile-ui-touch`.
+The earlier draft said there was no software AEC anywhere. There is now, on
+Apple platforms, and it arrived the same day as iOS voice.
 
-**Build the submission from that integration state, not from main.** Apple
-guideline 1.2 and Google's UGC policy both make block+report a hard gate for a
-chat app, and 5.1.1(v) makes in-app account deletion a hard gate for any app
-with accounts. Submitting a `main` build is an automatic rejection on all three.
+`src/voice/DarwinVpioBackend.mm` is a full `kAudioUnitSubType_VoiceProcessingIO`
+capture-and-render backend — Apple's own echo cancellation, noise suppression
+and automatic gain control, in one audio unit, shared by macOS and iOS. Not
+WebRTC's APM (explicitly rejected, `src/voice/VoiceGain.h:25-50`), not
+Opus-side. Selection logic at `src/voice/AudioBackendSelect.h:59-78`; build flag
+`BSFCHAT_DARWIN_VPIO` defaults **ON** for Apple and is forced off elsewhere
+(`CMakeLists.txt:71-82`); runtime setting `audio/voiceProcessing` defaults true
+(`src/core/Settings.cpp:597-608`) and is surfaced as "Echo cancellation" in
+`qml/components/ClientSettings.qml:522-535`. A VPIO failure falls back to the Qt
+backend for the rest of the run (`src/voice/AudioWorker.cpp:899-920`).
+
+| Platform | Voice | Camera video | Screen share | Echo cancellation |
+| --- | --- | --- | --- | --- |
+| macOS | yes | yes | yes | **VPIO — implemented, not yet validated on device** |
+| iOS | **yes** | **yes** | **no** | **VPIO — implemented, not yet validated on device** |
+| Android | yes | yes | yes | platform/hardware, via `MODE_IN_COMMUNICATION` (`src/voice/AndroidAudioRouting.h:4-20`) |
+| Windows / Linux | yes | yes | yes | **none** (`src/voice/VoiceGain.h:66-70`) |
+
+`CMakeLists.txt:37-44` says it in the tree: **"IMPLEMENTED 2026-09-23, NOT YET
+HEARD"**. That is the whole difference between what you may write and what you
+may not:
+
+- **Safe:** "Echo cancellation and noise suppression on Mac and iPhone, using
+  the system's own voice processing."
+- **Not safe:** "crystal-clear", "echo-free", "studio quality", or any
+  superlative. One tester in a live room with speakers on decides whether that
+  sentence was true, and a store listing is a bad place to find out.
+- The support page already carries the per-platform version of this. Keep the
+  two in step.
+
+**[owner: decide]** Whether to mention AEC in the listings at all before it has
+been heard on a device. The recommendation is yes with the cautious wording
+above — it is a real feature and reviewers do not test audio quality — but it is
+your claim to make.
+
+### 0.3 The server-side report endpoint is still unmerged. This is the one hard blocker. (highest risk)
+
+The client half of blocking, reporting and account deletion **is** merged into
+the integration branch — `qml/components/BlockedUsersDialog.qml`,
+`ReportDialog.qml`, `DeleteAccountDialog.qml`, `src/net/IgnoredUsers.h`,
+`src/net/ReportRequest.h`, `src/net/DeactivateFlow.h`, all present at
+`wt/integrate`. That part of the earlier draft is now out of date.
+
+**The server half is not.** `server` main (`295156f`) has no
+`src/api/ReportHandler.cpp`; it exists only on `feat/ugc-safety` (`d5d0fe6`,
+worktree `wt/server-ugc-safety`). Against the deployed `chat.bsfchat.com`,
+`POST /_matrix/client/v3/rooms/{roomId}/report/{eventId}` **404s**.
+
+So today:
+
+| Mechanism | Client | Server | Works against production? |
+| --- | --- | --- | --- |
+| Block | merged | `m.ignored_user_list` is standard account data, already served | **yes** |
+| Account deletion | merged | deactivate already served | **yes** |
+| **Report** | merged | **unmerged, undeployed** | **no — the button fails** |
+
+An App Review tester following your own review notes will tap Report and watch
+it fail. That is a **guideline 1.2** rejection, and Google's UGC policy asks the
+same question. It is also the single item on this whole list that neither
+paperwork nor credentials can fix.
+
+**[owner: decide]** Merge and deploy `feat/ugc-safety` to `chat.bsfchat.com`
+before submitting, or do not submit. There is no third option that survives
+review. (The merge and the production deploy are both out of scope for the
+assistant that wrote this file.)
 
 ### 0.4 Google Play closed-testing rule
 
@@ -89,9 +146,9 @@ continuous days** before it can apply for production access. An organisation
 account, or an individual account older than that, is exempt.
 
 **You must check which one yours is**, in Play Console → Setup → Advanced
-settings, because it decides whether "closed testing tomorrow" means "production
-in two weeks" or "production whenever you like". Nothing in the code tells me
-this and I have not looked at your account.
+settings, because it decides whether "closed testing today" means "production in
+two weeks" or "production whenever you like". Nothing in the code tells me this
+and I have not looked at your account.
 
 ### 0.5 Things you must create before you can submit
 
@@ -101,40 +158,134 @@ this and I have not looked at your account.
 | 2 | `security@bsfchat.com` mailbox or alias | Cited in the policy and terms. |
 | 3 | **Demo account** on `chat.bsfchat.com` with a **password** (not OIDC) | Review notes hand it to the reviewer. See §5. |
 | 4 | **A second account**, and some seeded conversation | So the reviewer has someone to block and something to report. Apple reviewers routinely fail 1.2 because there is nothing to demonstrate against. |
-| 5 | Screenshots — iPhone 6.9" and 6.5"; Play phone set | Apple requires at least one 6.9" set. **Do not screenshot a voice channel for iOS.** |
-| 6 | 1024×1024 App Store icon, 512×512 Play icon, 1024×500 Play feature graphic | No alpha on the Apple icon. |
-| 7 | Legal entity name + jurisdiction | For `/terms`, and for the Play "Developer name". |
-| 8 | Merge the branches in §0.3 and cut a build | |
+| 5 | Screenshots — iPhone 6.9"; Play phone set | See §8 for the shot lists. The iPhone set must come off a real device; the Play set can come off an emulator. |
+| 6 | 1024×1024 App Store icon, 512×512 Play icon, 1024×500 Play feature graphic | No alpha and no transparency on the Apple icon. |
+| 7 | Legal entity name + jurisdiction | For `/terms`, `/privacy` §1, and the Play "Developer name". |
+| 8 | **Four** Play foreground-service demo videos | See §0.7. |
+| 9 | Merge + deploy the server side of §0.3 | The one blocker that is not paperwork. |
 
-### 0.6 Smaller things that will bite
+### 0.6 The licence question — a decision, not a task
+
+**There is still no LICENSE file in any of the six repos, and there never has
+been in any commit.** Neither listing may say "open source" until there is one.
+
+The evidence is genuinely mixed, which is why this is flagged rather than fixed:
+
+- **For open source:** the only licence declaration the owner has ever written
+  is `LABEL org.opencontainers.image.licenses=MIT` in `server/Dockerfile:59` and
+  `identity/Dockerfile:51` (both committed by Josh Griffith, 2026-04-15) — and
+  those labels are already published to the world in the GHCR images. The org is
+  public, `protocol` is cloned anonymously inside the server's build container,
+  the site links to source in four places and the footer says "BSFChat
+  **contributors**".
+- **Against:** 0 of 347 first-party source files carry a copyright or SPDX
+  header, no commit message in any repo has ever mentioned licensing, and
+  `bsfchat.com/terms` currently tells the public the opposite — that the source
+  is **source-available, not open source**, with no rights granted.
+
+Adding a licence is an irrevocable grant of rights to everyone, forever, over
+your own property, and it would contradict text already published on your own
+site. So it has not been added.
+
+**[owner: decide] — the specific questions, in the order they unblock things:**
+
+1. **Was `licenses=MIT` deliberate, or boilerplate copied into an OCI label
+   block?** Everything else follows from this one answer.
+2. **Whose name goes on it?** Your legal name, or a company. `/terms` §1 and
+   `/privacy` §1 need the same answer, and `installer.nsi:35` currently says
+   `(c) BSFChat`, which is not a legal entity.
+3. **Has anyone else committed non-trivial code?** If so they hold copyright and
+   must agree before anything is relicensed.
+4. **One licence for all six repos, or a split?** (An AGPL server with an MIT
+   client is defensible, but `protocol` links into both, which complicates it.)
+5. **Qt on iOS — this one is independent of your choice and needs a lawyer, not
+   a LICENSE file.** Qt for iOS is static-only and you are on the open-source
+   (LGPL-3.0) build; the CI pin comment at `.github/workflows/ci.yml:74-76` says
+   so explicitly. LGPLv3 §4(d)(0) expects a user to be able to relink your app
+   against a modified Qt, and an App Store binary cannot be relinked. The
+   realistic options are a commercial Qt licence for the iOS target, or
+   publishing relinkable object code and accepting the residual Apple-EULA risk.
+   **Choosing MIT does not solve this.**
+
+**Recommendation if you want one: MIT, across all six repos, plus a separate
+`TRADEMARK.md` for the name and logo** (MIT grants no trademark rights and
+people will assume it does). It ratifies the declaration you already made rather
+than inventing a new one, it retro-validates the MIT-labelled images already on
+GHCR, and nothing in the dependency set constrains it — everything is
+MIT/BSD/Apache-2.0/public-domain except MPL-2.0 (libdatachannel, file-level
+copyleft, compatible) and LGPL-3.0 Qt (which permits permissive application
+licensing). **Apache-2.0 is the defensible alternative** for its explicit
+patent grant, which is worth weighing given H.264/AV1/Opus and the fact that
+openh264 is built from Cisco *source* rather than shipped as Cisco's
+patent-covered binary. **AGPL/GPL would be actively self-defeating here** — that
+is the VLC-on-the-App-Store conflict, and you are mid-submission.
+
+Until that decision lands: the copy below says **"the source is public"**, which
+is true today. The word `foss` has been removed from the Apple keyword list,
+where it directly contradicted `/terms`.
+
+### 0.7 Four Play foreground-service declarations, not three
+
+Each foreground-service type needs a Play Console declaration **and a short
+screen recording** showing the feature in use. The earlier draft counted three.
+There are four, because the voice service declares camera as well:
+
+| Service | `foregroundServiceType` | Manifest | What the video must show |
+| --- | --- | --- | --- |
+| `VoiceService` | `microphone` | `android/AndroidManifest.xml:256-259` | Joining a voice channel, talking, then backgrounding the app while the call continues |
+| `VoiceService` | `camera` | same line — the type is `microphone\|camera` | Turning the camera on in a voice channel |
+| `SyncService` | `dataSync` | `:265-268` | A message arriving as a notification with the app backgrounded |
+| `MediaProjectionService` | `mediaProjection` | `:276-279` | The system screen-capture consent dialog, then a shared screen |
+
+`dataSync` is the one Google pushes back on hardest; the declaration text should
+say plainly that it keeps the Matrix sync connection open to deliver messages
+**without Firebase**, and that no third party is involved
+(`src/core/AndroidNotifier.cpp:309`).
+
+### 0.8 Smaller things that will bite
 
 - **Do not name Discord, Slack, TeamSpeak or Matrix-the-brand in Apple
   keywords.** Competitor trademarks in keywords are a 2.3.7 rejection. The
   keyword list below is clean; if you add to it, keep it clean. The *description*
   may describe the app as "Discord-style" as plain comparative language, but the
   safest copy avoids it, and the copy below does.
-- **`ITSAppUsesNonExemptEncryption` is already `true`** in `ios/Info.plist.in:157`,
-  deliberately (see the long justification at `:127-156`). That means App Store
-  Connect will want the **French encryption declaration** for distribution in
-  France, and will stop nagging once Apple issues you a code you can paste back
-  as `ITSEncryptionExportComplianceCode`. This is correct as-is; do not "simplify"
-  it to `false`.
-- **Three Android foreground-service types** (`microphone`, `dataSync`,
-  `mediaProjection`) each need a **Play Console declaration plus a demo video**
-  showing the feature in use. Budget time for three short screen recordings.
+- **`ITSAppUsesNonExemptEncryption` is `true`** in `ios/Info.plist.in:163-164`,
+  and that is the honest answer now more than ever: with voice on, the iOS
+  binary genuinely links DTLS-SRTP from libdatachannel against an OpenSSL we
+  cross-compile ourselves (`scripts/build-openssl-ios.sh`), which is not Apple's
+  OS crypto. **But the comment above that key is wrong about what `true` does.**
+  It claims the declaration stops App Store Connect asking. It does the
+  opposite: `false` is what skips the questionnaire; `true` means App Store
+  Connect *will* ask for export-compliance information until you paste back an
+  `ITSEncryptionExportComplianceCode`. Budget for answering it once per version,
+  for the French declaration, and for the annual self-classification report that
+  goes with shipping standard crypto. See `client/docs/ios-release.md` §3.
 - **iOS minimum version is unpinned.** No `IPHONEOS_DEPLOYMENT_TARGET` is set
-  anywhere; CI deliberately lets Qt 6.10.3 choose and prints it. Read the real
-  number off the CI log line "Minimum iOS version (chosen by the Qt toolchain)"
-  before you type it into the listing. Do not guess.
+  anywhere; CI deliberately lets Qt 6.10.3 choose and prints it
+  (`.github/workflows/ci.yml:1462-1469`). Read the real number off the CI log
+  line "Minimum iOS version (chosen by the Qt toolchain)" before you type it
+  into the listing. Do not guess.
 - **iPhone only.** `XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"`
-  (`CMakeLists.txt:498`). There is no iPad layout, so set the listing to iPhone
-  only rather than letting it ship an upscaled iPad build.
-- **No LICENSE file exists in any BSFChat repo.** The site links to source. Do
-  not write "open source" in either listing until one exists — the copy below
-  says "source is public", which is true.
-- **No push notifications on iOS.** Nothing arrives while the app is closed.
-  Worth a line in the description so it does not read as a bug; the copy below
-  has one.
+  (`CMakeLists.txt:701-702`). There is no iPad layout, so set the listing to
+  iPhone only rather than letting it ship an upscaled iPad build.
+- **No push notifications on iOS — and in fact no OS-level notifications at
+  all.** There is no APNs, no PushKit, and `NotificationManager` only has a
+  `QSystemTrayIcon` path (desktop) and an `AndroidNotifier` path
+  (`src/core/NotificationManager.cpp:18`, `:38`). On iPhone, new messages appear
+  in the UI while the app is open and nowhere else. Worth a line in the
+  description so it does not read as a bug; the copy below has one.
+- **Link previews fetch third-party pages from the reader's device, with no
+  setting to turn them off.** `qml/components/LinkPreview.qml:337-377` issues a
+  raw `XMLHttpRequest` GET against any URL anyone posts, following up to three
+  redirects, capped at two per message (`qml/components/MessageBubble.qml:1381-1387`);
+  YouTube links additionally hit `youtube.com/oembed` and `img.youtube.com`
+  (`:386-390`, `:46`, `:158`). This discloses the **reader's** IP to any site a
+  **sender** links, which sits awkwardly beside the "Hide my IP address" voice
+  setting. The privacy policy already discloses it honestly (§8, "Link
+  previews") and the Data Safety free text below mentions it.
+  **[owner: decide]** whether to add a setting to disable link previews before
+  submitting. Not a blocker; reviewers will not find it. It is the kind of thing
+  someone writes a blog post about later.
 
 ---
 
@@ -156,7 +307,8 @@ this and I have not looked at your account.
 | **EULA** | **Leave blank — accept Apple's standard EULA.** See §1.5 | |
 | **Copyright** | `2026 <legal entity>` | |
 | **Bundle ID** | `com.bsfchat.app` | |
-| **Version** | `0.0.48` (from tag `0.0.48-rc.2`; the suffix is stripped by `cmake/Version.cmake:59`) | |
+| **Version** | the tag you cut, with the suffix stripped — `v0.0.48-rc.2` → `0.0.48` (`cmake/Version.cmake:59`). **Read it off the build, do not copy this number.** | |
+| **Subtitle note** | voice is now in the iOS build; see §0.1 before reusing any older copy | |
 
 ### 1.2 Promotional text (170 max — editable without review) · **161 chars**
 
@@ -166,7 +318,7 @@ people. No analytics, no crash reporting, no ads, no third-party SDKs. Check
 the source.
 ```
 
-### 1.3 Description (4000 max) · **2742 chars**
+### 1.3 Description (4000 max) · **3656 chars**
 
 ```
 BSFChat is chat without the bullshit.
@@ -184,6 +336,7 @@ We cannot read your channels, and on most servers we do not know they exist.
 WHAT YOU GET
 
 • Channels and categories, organised how you want them
+• Voice channels, with camera video when you want it
 • Private channels with real role-based permissions
 • Direct messages
 • Threads, replies, edits, reactions, pinned messages and mentions
@@ -191,6 +344,20 @@ WHAT YOU GET
 • Full-text search across your history
 • Multiple servers in one app, each with its own account
 • Themes, accent colours and density that stay out of your way
+
+VOICE THAT KEEPS UP
+
+Join a voice channel and talk. Calls keep running when you switch apps or lock
+your phone, so walking to the next room does not end the conversation. Echo
+cancellation and noise suppression come from the system's own voice processing.
+Turn your camera on if you want to be seen, or leave it off.
+
+Calls connect directly between participants where your network allows it, which
+means the people in the call can see your IP address — the same as every
+peer-to-peer voice app. If you would rather they did not, turn on "Hide my IP
+address" and every call is routed through a relay instead. If that setting is on
+and no relay is available, the call is refused rather than quietly connected
+directly.
 
 ONE ACCOUNT, EVERY SERVER
 
@@ -219,26 +386,37 @@ BEFORE YOU DOWNLOAD — HONEST LIMITS
 • You need a BSFChat server to connect to. The app is a client. If you do not
   have one, you can join the public server at chat.bsfchat.com, or run your own
   from github.com/BSFChat in about five minutes.
-• Voice and video are not available on iPhone yet. They work on Mac, Windows,
-  Linux and Android; the iPhone app is text for now.
-• There are no push notifications yet. BSFChat shows you new messages while it
-  is open. Nothing is handed to Apple's notification servers because there is
-  nothing to hand.
+• Screen sharing is not available on iPhone. It works on Mac, Windows, Linux
+  and Android.
+• There are no push notifications. BSFChat shows you new messages while it is
+  open, and nothing at all while it is closed. Nothing is handed to Apple's
+  notification servers because there is nothing to hand.
+• Echo cancellation is new. It uses Apple's own voice processing and it is on by
+  default, but if a room gives you trouble, headphones still win.
 • Messages are not end-to-end encrypted. Traffic is protected by TLS and your
   server holds your history. We will not claim otherwise.
 
 bsfchat.com/privacy · bsfchat.com/support · github.com/BSFChat
 ```
 
-### 1.4 Keywords (100 max, comma-separated, no spaces) · **95 chars**
+### 1.4 Keywords (100 max, comma-separated, no spaces) · **96 chars**
 
 ```
-selfhosted,selfhost,privacy,chat,messaging,community,team,server,nologging,noads,guild,irc,foss
+selfhosted,selfhost,privacy,chat,messaging,voice,community,team,server,nologging,noads,guild,irc
 ```
 
 Rules applied: no competitor trademarks (2.3.7), no repetition of words already
 in the name or subtitle (Apple indexes those separately, so repeating wastes
 characters), singular forms only (Apple stems automatically).
+
+Two changes from the earlier draft:
+
+- **`voice` added.** It is now a real feature of the iOS build and it is the
+  word people search for.
+- **`foss` removed.** There is no LICENSE file in any repo, and
+  `bsfchat.com/terms` currently tells the public the software is
+  source-available rather than open source. Claiming `foss` in the keyword field
+  contradicts your own published terms. Put it back the day §0.6 is settled.
 
 ### 1.5 EULA: use Apple's standard one — recommended
 
@@ -280,8 +458,10 @@ automatically and a custom EULA is optional there too.)*
 
 ## 2. Google Play
 
-Android **does** have voice, video and screen sharing, so this copy differs from
-Apple's on purpose. Do not unify them.
+Android has **screen sharing** and iOS does not, so this copy still differs from
+Apple's on purpose. Do not unify them. Voice and camera video are no longer a
+difference between the two — both have them (see §0.1) — so the older
+instruction to strip all voice language from the Apple copy no longer applies.
 
 ### 2.1 Fields
 
@@ -298,7 +478,7 @@ Apple's on purpose. Do not unify them.
 | **Support email** | `support@bsfchat.com` | |
 | **Support website** | `https://bsfchat.com/support` | |
 | **Application ID** | `com.bsfchat.app` — **permanent, verify before first upload** | |
-| **versionCode / versionName** | `4702` / `0.0.48-rc.2` | |
+| **versionCode / versionName** | derived, not typed. `cmake/Version.cmake:70-135`: `MAJOR*1000000 + MINOR*10000 + PATCH*100`, minus 100 plus N for an `-rc.N`. So `0.0.48-rc.2` → **4702**, and the eventual `0.0.48` → **4800**. **Read the real pair off the CI log ("BSFChat version:" line) or `aapt2 dump badging` on the artefact — a versionCode is burned permanently by any upload to any track.** | |
 | **minSdk / targetSdk** | 28 (Android 9) / 36 | |
 
 ### 2.2 Short description (80 max) · **78 chars**
@@ -417,7 +597,7 @@ enforcement actions.
 | **Financial info** | **No** | No | — | — | No payment code, no IAP, no billing library. |
 | **Health and fitness** | **No** | No | — | — | |
 | **Contacts / Calendar / SMS / Call logs** | **No** | No | — | — | No permission requested, no API touched. |
-| **Web browsing history** | **No** | No | — | — | No WebView anywhere (`qml/mobile/MobileMain.qml:719`). |
+| **Web browsing history** | **No** | No | — | — | No WebView anywhere (`qml/mobile/MobileMain.qml:776`). |
 | **Installed apps** | **No** | No | — | — | |
 | **Photos — photo library** | **No** | — | — | — | No photo-library permission on either platform; attachments come from the file picker. |
 
@@ -447,6 +627,11 @@ app. The app contains no analytics, no crash reporting, no advertising and no
 third-party SDKs, and sends nothing to the developer about how it is used.
 Voice, video and screen-share streams are transmitted live between participants
 and are never recorded or stored.
+
+When a message contains a link, the app fetches that page from the user's own
+device to show a preview, so the linked site receives the reader's IP address in
+the same way it would if the reader opened the link in a browser. No preview
+data is sent to or stored by the developer.
 ```
 
 ---
@@ -462,15 +647,15 @@ Apple's definition of "collect" is data **transmitted off the device and
 retained beyond the time needed to service the request**, which lets you exclude
 live media streams honestly, unlike Google's.
 
-### 4.1 Answers — iOS build (remember: no voice)
+### 4.1 Answers — iOS build
 
 | Apple data type | Collected | Linked to user | Used to track | Purpose | Reasoning |
 | --- | --- | --- | --- | --- | --- |
 | **Contact Info › Name** | **Yes** | Yes | No | App Functionality | Display name and nickname, stored on the server, shown to others. |
 | **Contact Info › Email Address** | **Yes** | Yes | No | App Functionality | **Optional and unverified**, only via BSFChat ID. Apple has no "optional" flag — declare it; the policy explains. |
 | **Contact Info › Phone, Physical Address, Other** | No | — | — | — | Never requested; no column exists. |
-| **User Content › Photos or Videos** | **Yes** | Yes | No | App Functionality | Attachments and avatars. |
-| **User Content › Audio Data** | **No** | — | — | — | **iOS build has no voice** (`CMakeLists.txt:24-25`). If you later ship voice on iOS, this becomes Yes. |
+| **User Content › Photos or Videos** | **Yes** | Yes | No | App Functionality | Attachments and avatars — **and, since iOS voice landed, live camera video in a voice channel**, which is transmitted and never recorded. |
+| **User Content › Audio Data** | **Yes** | Yes | No | App Functionality | **Changed — iOS voice now ships** (`CMakeLists.txt:57-59`). Microphone audio is transmitted live to the other participants in a voice channel. Apple's "collect" means retained beyond servicing the request, and nothing records it (`src/voice/` writes no audio anywhere) — but it leaves the device, so declare it, and say "not retained" in the purpose notes rather than answering No. |
 | **User Content › Customer Support** | **Yes** | Yes | No | App Functionality | Report reasons, plus a stored copy of the reported message. |
 | **User Content › Other User Content** | **Yes** | Yes | No | App Functionality | Messages, reactions, threads, pins. |
 | **Identifiers › User ID** | **Yes** | Yes | No | App Functionality | Matrix user ID + server-issued device ID. |
@@ -489,31 +674,41 @@ live media streams honestly, unlike Google's.
 no third-party partners. This also means you do **not** need App Tracking
 Transparency, and `ATTrackingManager` correctly appears nowhere in the tree.
 
-### 4.2 The awkward one: microphone and camera usage strings with no voice
+### 4.2 Microphone and camera: the strings, the prompt, and the background mode
 
-`ios/Info.plist.in` declares `NSMicrophoneUsageDescription` and
-`NSCameraUsageDescription` even though voice is compiled out. This is
-**deliberate and load-bearing**, not an oversight: the file's own header explains
-that Qt decides at *configure* time whether to link the
-`QDarwinMicrophonePermission` / `QDarwinCameraPermission` backends by running
-PlistBuddy over the named plist, so removing the keys would permanently break
-permission prompts when voice does land.
+`ios/Info.plist.in:85-88` declares `NSMicrophoneUsageDescription` and
+`NSCameraUsageDescription`, and — now that voice is on — the app **does** prompt.
+`CMakeLists.txt:21-24` records that the microphone prompt appeared at first join
+on a real iPhone, which is exactly the behaviour Apple wants. Denial is handled
+with iOS-specific copy pointing at Settings → Privacy & Security → Microphone
+(`src/voice/VoiceStartPolicy.h:66-69`).
 
-Reviewers do occasionally query a usage string for hardware the app never asks
-for. It is not a rejection in itself — declaring a string is not the same as
-requesting access, and the app never triggers a prompt. **§5.1 of the review
-notes pre-empts the question**; leave the keys alone.
+Both strings are also load-bearing for the build, not just for the user: the
+file's own header explains that Qt decides at *configure* time whether to link
+the `QDarwinMicrophonePermission` / `QDarwinCameraPermission` backends by running
+PlistBuddy over the named plist. Removing a key silently breaks the prompt.
+Leave them alone.
 
-Note the asymmetry this creates and be ready for it: the **Play** Data Safety
-form says audio is collected (Android has voice) and the **Apple** label says it
-is not (iOS does not). That is correct, not inconsistent. Revisit the Apple
-label the day iOS voice ships.
+**The microphone string already describes background use** — "including while
+BSFChat is in the background, so the call continues when you switch apps". That
+is deliberate and it must stay, because the build ships
+`UIBackgroundModes: audio` (`CMakeLists.txt:676-685` → `ios/Info.plist.in:207`).
+A background mode whose usage string implies foreground-only capture is the
+precise inconsistency App Review looks for. The two ship together or not at all:
+`src/voice/IosAudioSession.mm:128-170` sets the `AVAudioSession` category to
+`playAndRecord` with mode `voiceChat`, which is what makes the declaration true
+rather than merely present.
+
+**The Apple and Play answers now match** on audio and video. The earlier draft
+told you to expect an asymmetry — Play saying audio is collected and Apple
+saying it is not — and to revisit the Apple label "the day iOS voice ships".
+That day was 2026-09-23. It has been revisited; §4.1 is the result.
 
 ---
 
 ## 5. App review notes
 
-### 5.1 Apple — App Review Information → Notes (4000 max) · **3904 chars**
+### 5.1 Apple — App Review Information → Notes (4000 max) · **3979 chars**
 
 ```
 Thank you for reviewing BSFChat.
@@ -521,11 +716,11 @@ Thank you for reviewing BSFChat.
 WHAT THIS APP IS
 
 BSFChat is a client for self-hosted chat servers, as an email client is a
-client for mail servers. Messages live on a BSFChat server run by the user or
-their community. We operate one public server; the demo account is on it.
+client for mail servers. Messages live on a server run by the user or their
+community. We operate one public server; the demo account is on it.
 
-There is no in-app registration on purpose: an account belongs to a server, so
-accounts are made by that server's operator. Please use the account below.
+There is no in-app registration on purpose: an account belongs to a server and
+is made by that server's operator. Please use the account below.
 
 DEMO ACCOUNT
 
@@ -538,64 +733,71 @@ HOW TO SIGN IN
 1. Launch. The "Add a server" screen appears.
 2. Tap "Show manual server entry", below the OR divider.
 3. Enter https://chat.bsfchat.com and tap "Check".
-4. Tap "Use password instead"; enter the username and password above.
-5. You land in a server with seeded channels and conversation.
+4. Tap "Use password instead"; enter the username and password above. You
+   land in a server with seeded channels and conversation.
 
-("Sign in with BSFChat ID" is our own OpenID Connect provider, id.bsfchat.com:
-first-party, not a social login, so 4.8 does not apply and no Sign in with
-Apple is required. It uses ASWebAuthenticationSession, not a web view.)
+("Sign in with BSFChat ID" is our own OpenID Connect provider at
+id.bsfchat.com: first-party, not a social login, so 4.8 does not apply. It uses
+ASWebAuthenticationSession, not a web view.)
 
-GUIDELINE 1.2 - USER-GENERATED CONTENT
+GUIDELINE 1.2 - UGC
 
-* Block a user: tap any person's name or avatar on a message, or in the member
-  list, to open their profile card, then tap the lock button ("Block - you stop
-  seeing their messages. They are not told."). Immediate and server-side: their
-  messages and invitations stop reaching the blocker on every device. Manage at
-  "..." menu > Your profile > Blocked accounts, with Unblock per row.
-* Report content: long-press any message you did not send > "Report message...",
-  or "Report user..." for the person. Free-text reason, plus an "also block
-  them" checkbox ticked by default. Reports go to that server's administrators
-  with a retained copy of the message. The bolt button on a profile card
-  reports the user directly.
-* Moderation: each server's administrators can remove content and ban accounts.
-  On the server we operate we act on reports ourselves, within 24 hours.
-* Published contact info: https://bsfchat.com/support. Our terms at
-  https://bsfchat.com/terms state zero tolerance for abusive content and users.
+* Block: tap any name or avatar to open the profile card, then the lock
+  button. Immediate and server-side; their messages and invitations stop
+  reaching the blocker on every device, and they are not told. Manage at
+  "..." > Your profile > Blocked accounts.
+* Report: long-press any message you did not send > "Report message...", or
+  "Report user...". Free-text reason plus an "also block them" checkbox, ticked
+  by default. Reports reach that server's administrators with a retained copy
+  of the message.
+* Moderation: each server's admins remove content and ban accounts. On the
+  server we operate we act on reports within 24 hours.
+* Published contact: https://bsfchat.com/support. Our terms at
+  https://bsfchat.com/terms state zero tolerance for abusive content.
 
 GUIDELINE 5.1.1(v) - ACCOUNT DELETION
 
-"..." menu > Your profile > bottom of the list > "Delete account" (below "Log
-out"). It lists what is deleted and requires the username and password to
-confirm.
+"..." > Your profile > bottom of the list > "Delete account". It lists what is
+deleted; to confirm you type your username and enter your password. (Accounts
+created through our sign-in provider have no chat-server password; the typed
+username alone confirms those.)
 
-One thing we disclose rather than hide: deletion destroys the credentials,
-erases the profile and removes the person from every channel, but messages they
-already sent remain in those channels. A group conversation belongs to everyone
-in it. The dialog says so before confirming ("Messages you have sent stay in
-their channels"), and https://bsfchat.com/privacy#deletion explains it.
+We disclose rather than hide: deletion destroys the credentials, erases the
+profile and removes the person from every channel, but messages they sent
+remain, because a group conversation belongs to everyone in it. The dialog says
+so before confirming; https://bsfchat.com/privacy#deletion explains it.
+
+VOICE AND BACKGROUND AUDIO
+
+This build has voice channels and camera video: tap a voice channel, then
+Join. iOS asks for the microphone the first time, and for the camera when you
+first use it.
+
+UIBackgroundModes is "audio" and it is used: a call continues while the app is
+backgrounded or the screen is locked. To see it, join the channel and swipe
+home - audio keeps flowing. Without the mode iOS silences the session and every
+call dies on backgrounding. AVAudioSession is playAndRecord / voiceChat, and
+the microphone usage string describes the background case explicitly. Nothing
+is recorded: media is transmitted live and written nowhere.
 
 WHAT THIS BUILD DOES NOT DO
 
-* No voice or video on iOS in this release. They exist on macOS, Windows, Linux
-  and Android but are not compiled into the iOS target, and the App Store
-  description does not mention them.
-* No push notifications: no APNs or PushKit, and no UIBackgroundModes, all
-  deliberate. The app shows new messages while it is open.
-* Info.plist declares microphone and camera usage strings although this build
-  requests neither. The Qt build system decides at configure time whether to
-  link the permission backends by reading those keys, so removing them would
-  break permissions when voice ships. No prompt is ever triggered.
-* No in-app purchases, advertising, analytics, crash reporting, or third-party
-  SDKs of any kind.
+* No screen sharing on iOS. It exists on the other platforms; the control is
+  not shown here and the description says so.
+* No push notifications: no APNs, no PushKit, no notification framework at all.
+  New messages appear while the app is open and nowhere else. The background
+  audio mode is for calls only.
+* No in-app purchases, advertising, analytics, crash reporting or third-party
+  SDKs.
 
 OTHER
 
-* Privacy policy: https://bsfchat.com/privacy - explicit that messages are not
-  end-to-end encrypted.
-* ITSAppUsesNonExemptEncryption is true: we link OpenSSL we cross-compile
-  ourselves, not only Apple's cryptography.
+* https://bsfchat.com/privacy is explicit that messages are not E2E encrypted.
+* ITSAppUsesNonExemptEncryption is true: call media is DTLS-SRTP built against
+  an OpenSSL we cross-compile ourselves, not only Apple's cryptography.
 * NSLocalNetworkUsageDescription is declared because self-hosted servers often
-  live on a LAN. Connecting to chat.bsfchat.com will not trigger the prompt.
+  live on a LAN and because calls gather host ICE candidates. Connecting to
+  chat.bsfchat.com does not trigger the prompt.
 
 support@bsfchat.com reaches a human.
 ```
@@ -629,14 +831,19 @@ USER-GENERATED CONTENT CONTROLS (Play UGC policy)
 
 ACCOUNT DELETION
 
-  In-app at ... > Your profile > Delete account (username and password
-  confirmation). Also available by email to support@bsfchat.com. Web route for
-  the Play account-deletion declaration: https://bsfchat.com/support
+  In-app at ... > Your profile > Delete account. Confirmation is typing your
+  username, plus your password if the account has one (accounts created through
+  our sign-in provider have no chat-server password). Also available by email to
+  support@bsfchat.com. Web route for the Play account-deletion declaration:
+  https://bsfchat.com/support
 
 FOREGROUND SERVICES — why each one exists
 
   • microphone (VoiceService): keeps the process alive during a voice call so
     Android does not kill it when the user switches apps mid-conversation.
+  • camera (VoiceService, same service): the user can turn their camera on
+    inside a voice channel, and the call — video included — must survive
+    backgrounding for the same reason.
   • dataSync (SyncService): maintains the connection to the user's chosen server
     so messages can raise a local notification while the app is backgrounded.
     There is no Firebase Cloud Messaging in this app — notifications are
@@ -664,7 +871,7 @@ not only in-app.
 | Field | Answer |
 | --- | --- |
 | Can users request account deletion? | Yes |
-| In-app path | `... menu → Your profile → Delete account` |
+| In-app path | `... menu → Your profile → Delete account` (type the username; password too, for password accounts) |
 | Web URL | `https://bsfchat.com/support` |
 | Is any data retained after deletion, and why? | Yes — messages the user sent remain in the conversations they were part of, along with the display name recorded in historical membership events, because a group conversation belongs to all its participants. Moderation and audit records are retained. Backups age out within 30 days. Explained at `https://bsfchat.com/privacy#deletion`. |
 
@@ -683,13 +890,13 @@ questionnaire changes).
 | References to drugs, alcohol or tobacco? | **No** | |
 | Gambling, simulated or real? | **No** | |
 | Horror or fear themes? | **No** | |
-| **Does the app allow users to interact or exchange content with other users?** | **Yes** | The entire app. Text, files, images, and on Android live voice, video and screen share. This is the single answer that drives the rating. |
+| **Does the app allow users to interact or exchange content with other users?** | **Yes** | The entire app. Text, files, images, live voice and camera video on every platform, and screen share everywhere except iOS. This is the single answer that drives the rating. |
 | **Can users share their current location with others?** | **No** | No location feature. Be ready to defend this: peer-to-peer calls expose an IP address to other participants, and an IP is coarsely geolocatable. IARC's question is about a *location-sharing feature*, and there is none — the user cannot send their location and the app never reads it. Disclosed in the privacy policy under Voice and video, with a "Hide my IP address" setting as the mitigation. Do not tick this box. |
 | **Can users share personal information with other users?** | **Yes** | Free-text messages and arbitrary file uploads. A user can type anything. |
 | Does the app let users purchase digital goods? | **No** | No IAP, no billing library, no payment code. |
 | Does the app contain ads? | **No** | |
 | Does the app provide unrestricted access to the internet (a browser)? | **No** | No WebView, WebEngine or in-app browser. Links open in the system browser, which IARC does not count. |
-| Is user-generated content moderated? | **Yes** | Per-server administrators, plus in-app reporting and blocking. Note in free text that moderation is by each server's operator, since the app is self-hosted. |
+| Is user-generated content moderated? | **Yes** | Per-server administrators, plus in-app reporting and blocking. Note in free text that moderation is by each server's operator, since the app is self-hosted. **Only answer Yes once the server-side report endpoint of §0.3 is deployed** — until then the Report button 404s and the answer is not true. |
 | Is the app directed at children? | **No** | Minimum age 13 (16 in UK/EEA) in the terms. |
 | Does the app share data with third parties? | **No** | |
 | Does the app collect precise location? | **No** | |
@@ -717,17 +924,48 @@ Apple will also ask, in the same flow, whether the app has **age verification**
 
 ## 7. Checklist for tomorrow
 
-- [ ] Create `support@bsfchat.com` and `security@bsfchat.com`
-- [ ] Fill the legal entity into `/terms` §1 and §10, and delete the three
-      review banners from `/privacy`, `/terms` and `/support`
-- [ ] Decide the two retention numbers in `/privacy` §9 (logs, backups) and make
-      them true on the host, or change them
-- [ ] Merge `feat/ugc-safety` (server) and the mobile/UGC client branches; do
-      not build from `main`
-- [ ] Create the demo account + a second account + seeded conversation on
-      `chat.bsfchat.com`, and paste the credentials into §5.1 and §5.2
-- [ ] Confirm which Play closed-testing rule your account falls under (§0.4)
-- [ ] Read the real minimum iOS version off the CI log (§0.6)
-- [ ] Record three short foreground-service demo videos for Play
-- [ ] Screenshots — and no voice channel in the iPhone set
-- [ ] Publish the `web` branch (it is deliberately unmerged right now)
+Ordered so that nothing waits on something further down. The full end-to-end
+runbook, including every CI step and both upload paths, is
+`client/docs/store-submission-runbook.md` — this list is the paperwork subset.
+
+**Blockers (nothing ships until these are true)**
+
+- [ ] Merge `feat/ugc-safety` into `server` main and deploy it to
+      `chat.bsfchat.com`, then tap Report on a real build and watch it succeed
+      (§0.3). This is the only item that is not paperwork.
+- [ ] Create `support@bsfchat.com` and `security@bsfchat.com` and send a test
+      message to each. Both stores email them; a bounce is a rejection.
+- [ ] Create the demo account, a second account, and a seeded conversation on
+      `chat.bsfchat.com`. Paste the credentials into §5.1 and §5.2.
+
+**Decisions only you can make**
+
+- [ ] The licence (§0.6) — at minimum, answer question 1: was
+      `org.opencontainers.image.licenses=MIT` deliberate?
+- [ ] Legal entity name and jurisdiction → `/terms` §1 and §10, `/privacy` §1,
+      Play "Developer name", App Store "Copyright".
+- [ ] The two retention numbers in `/privacy` §9 (nginx logs, backups) — make
+      them true on the host, or change the numbers.
+- [ ] Whether to claim echo cancellation in the copy before it has been heard on
+      a device (§0.2).
+- [ ] Whether to ship a setting to disable link previews first (§0.8). Not a
+      blocker.
+
+**Paperwork**
+
+- [ ] Delete the owner-review banners from `/privacy`, `/terms` and `/support`
+      once you have read them.
+- [ ] Confirm which Play closed-testing rule your account falls under (§0.4).
+- [ ] Read the real minimum iOS version off the CI log line "Minimum iOS version
+      (chosen by the Qt toolchain)" and type that into the listing (§0.8).
+- [ ] Record **four** foreground-service demo videos for Play — microphone,
+      camera, dataSync, mediaProjection (§0.7).
+- [ ] Answer the App Store Connect export-compliance questions; expect them,
+      because `ITSAppUsesNonExemptEncryption` is `true` (§0.8).
+
+**Screenshots** (shot lists: `client/docs/store-submission-runbook.md` §8)
+
+- [ ] iPhone 6.9" set — **must come off a real device**, and the set now
+      includes a voice channel, which the earlier draft told you to avoid.
+- [ ] Play phone set — an emulator is acceptable; the assistant can capture
+      these.
