@@ -201,3 +201,108 @@ p { color: var(--text-muted); margin: 0 0 1rem; }
 }
 
 html { scroll-behavior: smooth; }
+
+/* ---------------------------------------------------------------------------
+   Document pages (/privacy, /terms, /support)
+   Long-form prose. Same tokens as the landing page — no new colours.
+   --------------------------------------------------------------------------- */
+
+.doc { padding: 3rem 0 4rem; }
+.doc .container { max-width: 46rem; }
+
+.doc h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 0.4em; }
+.doc h2 {
+  font-size: 1.35rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.doc h3 { font-size: 1.05rem; margin-top: 1.8rem; }
+.doc h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 2rem; }
+
+.doc p, .doc li { color: var(--text-muted); }
+.doc strong { color: var(--text); font-weight: 600; }
+.doc ul, .doc ol { margin: 0 0 1rem; padding-left: 1.3rem; }
+.doc li { margin-bottom: 0.5rem; }
+.doc a { color: var(--accent); }
+.doc a:hover { text-decoration: underline; }
+
+.doc-meta {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+  margin-bottom: 2rem;
+}
+
+/* Callouts. .doc-note is the neutral one; .doc-note-review is the
+   "an AI drafted this, a human has not signed it off" banner. */
+.doc-note {
+  background: var(--bg-1);
+  border: 2px solid var(--border);
+  border-left-width: 4px;
+  border-left-color: var(--accent);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  margin: 0 0 2rem;
+}
+.doc-note p:last-child { margin-bottom: 0; }
+.doc-note h2, .doc-note h3 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  color: var(--text);
+}
+
+.doc-note-review { border-left-color: #faa61a; }
+.doc-note-review h2 { font-size: 1.1rem; }
+
+/* Inline marker for a sentence the owner must confirm before publishing. */
+.review-flag {
+  color: #faa61a;
+  font-weight: 600;
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Tables — used for the "what is stored" summaries. */
+.doc table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+.doc th, .doc td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.doc th { color: var(--text); font-weight: 600; }
+.doc thead tr { border-bottom: 2px solid var(--border); }
+.doc tbody tr:last-child td { border-bottom: 0; }
+
+.doc-table-wrap { overflow-x: auto; }
+
+/* The "what we do not collect" list — visually distinct from prose. */
+.doc-nope { list-style: none; padding-left: 0; }
+.doc-nope li {
+  padding-left: 1.6rem;
+  position: relative;
+}
+.doc-nope li::before {
+  content: "×";
+  position: absolute;
+  left: 0.35rem;
+  top: -0.05rem;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.15em;
+}
+
+@media (max-width: 540px) {
+  .doc { padding: 2rem 0 3rem; }
+  .doc th, .doc td { padding: 0.5rem 0.5rem; font-size: 0.9rem; }
+}
