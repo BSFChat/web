@@ -1,4 +1,53 @@
 <!doctype html>
+<!--
+  OWNER NOTES — NOT RENDERED, BUT STILL PUBLIC (view-source, and .md files in
+  this repo are served). Nothing secret here. These are the unresolved items
+  from the visible "Owner: read before publishing" box that was removed on
+  26 September 2026, which was live to the public until then, plus what the
+  same-day accuracy pass added. Delete each line as it stops being true.
+
+  This page was drafted by an AI assistant. It is not legal advice and no
+  lawyer has read it.
+
+  BLOCKS PUBLICATION
+  1. THE CONTRACTING PARTY (section 1). The page now says "BSFChat" and nothing
+     more, because that is all that can honestly be said today. "BSFChat" is a
+     trading name, not a legal person: it cannot properly be the party you
+     contract with, and it cannot be the data controller in the privacy policy
+     either. Resolving this needs either a registered company or disclosure of
+     the individual behind the trading name. That is your decision and was
+     deliberately not worded around. An address for service is also still
+     missing and none was invented.
+  2. support@bsfchat.com and security@bsfchat.com DO NOT EXIST, and this page
+     cites both as the route for complaints and vulnerability reports.
+
+  DECIDE
+  3. GOVERNING LAW (section 10) now says the United Kingdom. The UK is three
+     legal jurisdictions — name England and Wales, Scotland, or Northern
+     Ireland before anyone relies on this clause.
+  4. THE APP LICENCE (section 2). This page deliberately does NOT try to be an
+     end-user licence agreement for the iOS app. The recommendation stands:
+     leave the EULA field blank in App Store Connect and accept Apple's
+     standard Licensed Application EULA. Reasons are in STORE-LISTING.md. If
+     you want a custom EULA instead, this page is not it and you need a lawyer.
+  5. AGE (section 3). The old "13, or 16 in the UK or the EEA" was wrong: UK
+     GDPR sets 13 via the Data Protection Act 2018, and the 16 is the EU GDPR
+     Article 8 default that member states may lower. It now states 13 as the
+     floor, says a higher local age governs where one applies, and says plainly
+     that no age is verified. Whatever it says must match what you declare in
+     App Store Connect and the Play Console, and it must agree with section 11
+     of the privacy policy — as of this edit, the two agree.
+
+  VERIFIED, NO ACTION NEEDED FOR NOW
+  6. Section 8's "source-available" wording is correct: as of 26 September 2026
+     there is no LICENSE file in any of client, server, identity, protocol,
+     deploy or web. If you add one, that licence governs and section 8 must be
+     updated to say so.
+  7. Section 5's CSAM paragraph is deliberately reactive-only. That matches the
+     code: there is no scanning, no hash matching against any known-material
+     database and no automated detection anywhere in the codebase. If that ever
+     changes, this section and the privacy policy must change with it.
+-->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -32,49 +81,7 @@
       <section class="doc">
         <div class="container">
           <h1>Terms of Service</h1>
-          <p class="doc-meta">Last updated 23 September 2026</p>
-
-          <div class="doc-note doc-note-review">
-            <h2>Owner: read before publishing</h2>
-            <p>
-              <strong>An AI assistant drafted this. It is not legal advice and
-              no lawyer has seen it.</strong> Check these specific things:
-            </p>
-            <ul>
-              <li>
-                <strong>The app licence.</strong> This page deliberately does
-                <em>not</em> try to be an end-user licence agreement for the iOS
-                app. The recommendation is that you leave the EULA field blank
-                in App Store Connect and accept
-                <a
-                  href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-                  rel="noopener"
-                  >Apple's standard Licensed Application EULA</a
-                >. Reasons are in <code>STORE-LISTING.md</code>. If you instead
-                want a custom EULA, this page is not it and you need a lawyer.
-              </li>
-              <li>
-                <strong>Section 1 names you.</strong> Fill in who "we" legally
-                is — a sole trader trading as BSFChat, a limited company, or
-                your own name — and a jurisdiction in section 10. Both are
-                blank-ish placeholders right now and both matter.
-              </li>
-              <li>
-                <strong>Section 3 sets a minimum age of 13 (16 in the UK/EEA).</strong>
-                Confirm that matches what you tell the stores. The age you
-                declare in App Store Connect and the Play Console must agree
-                with this page.
-              </li>
-              <li>
-                <strong>There is no LICENSE file in any BSFChat repository.</strong>
-                Until you add one, the source on GitHub is visible but not
-                legally open source, and this page must not say that it is. It
-                currently says "source available", which is accurate. If you add
-                a licence, update section 8.
-              </li>
-            </ul>
-            <p>Delete this box before publishing.</p>
-          </div>
+          <p class="doc-meta">Last updated 26 September 2026</p>
 
           <p>
             These terms cover two different things, and it is worth being clear
@@ -99,10 +106,10 @@
 
           <h2>1. Who you are agreeing with</h2>
           <p>
-            "We", "us" and "BSFChat" mean
-            <span class="review-flag">[owner: your legal name or company]</span>,
-            the operator of <code>bsfchat.com</code> and the publisher of the
-            BSFChat apps. You can reach us at
+            "We", "us" and "BSFChat" mean BSFChat, the operator of
+            <code>bsfchat.com</code>, <code>chat.bsfchat.com</code> and
+            <code>id.bsfchat.com</code> and the publisher of the BSFChat apps.
+            You can reach us at
             <a href="mailto:support@bsfchat.com">support@bsfchat.com</a>.
           </p>
           <p>
@@ -139,20 +146,46 @@
 
           <h2>3. Age</h2>
           <p>
-            You must be at least <strong>13 years old</strong> to use BSFChat,
-            or at least <strong>16</strong> if you are in the United Kingdom or
-            the European Economic Area. BSFChat is not designed for children and
-            we do not knowingly hold accounts for them. If you believe a child
-            has an account on one of our servers, email
-            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a> and we
-            will remove it.
+            You must be at least <strong>13 years old</strong> to use BSFChat.
+            Age requirements for a service like this one vary from region to
+            region, and in some places the age is higher than 13. <strong>Where
+            the law where you live sets a higher age, that is the age that
+            applies to you</strong>, not ours.
+          </p>
+          <p>
+            We have tried to keep the app out of the regions where it would be
+            unlawful for the people there to use it, and where we have got that
+            wrong we will put it right as soon as we are made aware of it.
+            <strong>We do not verify anybody's age.</strong> The app asks for no
+            date of birth and contains no age gate, so what is written here is
+            what we intend and require, not a check we perform. BSFChat is not
+            designed for children and we do not knowingly hold accounts for
+            them. If you believe a child has an account on one of our servers,
+            email <a href="mailto:support@bsfchat.com">support@bsfchat.com</a>
+            and we will remove it. The
+            <a href="/privacy#children">privacy policy</a> says the same thing
+            in more detail.
           </p>
 
           <h2>4. Your account</h2>
           <p>
-            You are responsible for your account and for what is done with it.
-            Keep your password to yourself. Turn on two-factor authentication if
-            you want it — it is in your identity account settings.
+            You are responsible for your account and for everything done with
+            it. Keep your password to yourself. Turn on two-factor
+            authentication if you want it — it is in your identity account
+            settings.
+          </p>
+          <p>
+            <strong>That responsibility does not move, and it is worth being
+            blunt about what it means.</strong> If your account is used to break
+            section 5, the consequence lands on the account: it can be banned
+            from a chat server we run, from <code>id.bsfchat.com</code>, or from
+            both. It makes no difference whether you did it yourself, let
+            somebody else use your account, or were careless enough with your
+            password that they did not have to ask. Those three look identical
+            from where we sit, we have no way to tell them apart, and the only
+            person who can decide who uses your account is you. If you think
+            somebody else has got into it, change your password, turn on
+            two-factor authentication, and tell us.
           </p>
           <p>
             You can delete your account from inside the app at any time:
@@ -171,7 +204,7 @@
               Post, upload or share content that is illegal where you are or
               where we are. Child sexual abuse material, in particular, is
               reported to the authorities and the account is terminated
-              immediately and permanently.
+              immediately and permanently — see below.
             </li>
             <li>
               Harass, threaten, stalk, impersonate, or incite violence against
@@ -208,6 +241,30 @@
             message was sent on. On our servers, we act on reports ourselves. We
             may remove content, suspend an account or terminate it — with notice
             where that is reasonable and without it where it is not.
+          </p>
+          <p>
+            <strong>Child sexual abuse material.</strong> This is the one point
+            in these terms that is addressed to server operators as well as to
+            users. If you run a BSFChat server, material of this kind must be
+            reported to the authorities in your country, and we expect anyone
+            running a server to do exactly that. On a server we operate, where
+            we are made aware of such material we will report it to the
+            appropriate authorities and terminate the account immediately and
+            permanently. A report keeps its own copy of the reported message
+            even after the message itself is deleted — the
+            <a href="/privacy#report">privacy policy explains why</a> — and that
+            copy is what makes reporting to an authority possible at all.
+          </p>
+          <p>
+            Being exact about the limits of that, because the opposite
+            impression would be worse than useless: <strong>nothing is
+            scanned.</strong> There is no automated detection anywhere in
+            BSFChat — no image scanning, no matching against any database of
+            known material, no classifier — on our servers or in the app, and
+            nobody is reading your messages looking for anything. What we can do
+            is therefore entirely reactive. We act on what is reported to us,
+            and we cannot act on what nobody reports, which is the plainest
+            reason there is to use the report button.
           </p>
 
           <h2>6. Servers we do not run</h2>
@@ -251,8 +308,7 @@
           <p>
             BSFChat's source is published at
             <a href="https://github.com/BSFChat" rel="noopener">github.com/BSFChat</a>.
-            <span class="review-flag">[owner: confirm]</span> It is
-            source-available: no open-source licence has been applied to it yet,
+            It is source-available: no open-source licence has been applied to it yet,
             so publication alone does not grant you rights to copy, modify or
             redistribute it. If and when a licence file is added to those
             repositories, that licence governs and this paragraph is superseded
@@ -292,9 +348,8 @@
             reasonably can.
           </p>
           <p>
-            These terms are governed by the law of
-            <span class="review-flag">[owner: your jurisdiction]</span>, and its
-            courts have jurisdiction — without taking away any consumer-law
+            These terms are governed by the law of the United Kingdom, and the
+            UK courts have jurisdiction — without taking away any consumer-law
             right you have to bring a claim where you live.
           </p>
 
