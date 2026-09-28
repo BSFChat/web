@@ -34,17 +34,36 @@
 
   PROMISES THE CODE DOES NOT KEEP — the policy no longer states these as fact.
   Tighten it back up once they are real.
-  3. NGINX LOG RETENTION (section 9). There is no logrotate config in deploy/
-     and no retention we enforce; the host uses whatever its distribution
-     ships. The old text promised 14 days flat. It now says the intention is
-     14 days and that we do not yet enforce a period of our own. Configure it,
-     then make it a plain promise again.
-  4. BACKUPS (section 9). deploy/backup.sh has no schedule and no pruning — no
-     cron, no systemd timer, no age sweep. The old text promised 30 days. It
-     now says there is no automatic schedule and no automatic expiry. Note
-     deploy/README.md suggests a cron with a 14-day sweep, which is a
-     suggestion to the operator, not deployed code, and does not match the 30
-     days the page used to claim. Section 10's deletion limits lean on this.
+  3. RESOLVED 2026-09-28, and section 9 states fourteen days plainly again.
+     NGINX LOG RETENTION is now enforced by a config we ship rather than by
+     the distribution's default: deploy/logrotate/nginx, installed AS
+     /etc/logrotate.d/nginx (replacing the packaged file — installed beside it
+     the duplicate entry is skipped and the whole logrotate run exits 1), daily
+     with `rotate 14` and `maxage 14`, and the glob covers error.log as well as
+     access.log, which is the one that can hold live tokens.
+     Deliberately NO `notifempty`, and this is the bit not to "tidy up" later:
+     logrotate skips an empty log, and skipping it skips the pruning step, so
+     `maxage` never runs for it. A healthy error log is usually empty, so
+     `notifempty` would have left token-bearing archives on disk forever while
+     everything looked fine. Verified against logrotate 3.21 and 3.22.
+     The page says "a few hours short of fifteen days" on purpose: rotation is
+     daily, so 14 days is the ceiling on a ROTATED file. Do not round that off.
+  4. RESOLVED 2026-09-28, and section 9 states thirty days plainly again, so
+     section 10's deletion limits now lean on something real.
+     BACKUPS have a schedule and an expiry: deploy/systemd/bsfchat-backup.timer
+     nightly at 04:15 with Persistent=true, and deploy/backup.sh
+     --prune-older-than 30. The unit runs the prune BEFORE the backup, so the
+     expiry is not conditional on the backup succeeding — which is why the page
+     can say old data goes even on a night the backup fails. Say it that way or
+     not at all. The README cron suggestion, whose 14-day sweep never matched
+     the 30 days this page claimed, is gone.
+     NOTE THE RISK THIS CREATED, because it is a new one: thirty plaintext
+     copies of everything now accumulate on the same host. Directory 0700,
+     archives 0600, and the job refuses to run at all if the destination is
+     group- or world-readable. That bounds it. Encrypting the archives to a key
+     that is NOT on that host, and getting them off it, is still open — which
+     is why section 9 says so instead of implying a backup is safe because it
+     expires.
   5. IDENTITY-ACCOUNT DELETION (section 6) has no code path at all — it is a
      manual edit of the SQLite file. The page still promises to do it by hand
      on request. That is honest, but it is you, by hand, forever.
@@ -118,6 +137,16 @@
      an oracle for whether an address has an account. The code notes this
      (identity AccountHandler.cpp, security audit L2). Not mentioned on the
      page; worth closing when email verification lands.
+ 18. CONTAINER LOGS ARE UNBOUNDED, and section 9's fourteen days does not cover
+     them. deploy/docker-compose.yml sets no `logging` options, so Docker's
+     default json-file driver keeps the chat server's and identity service's own
+     output under /var/lib/docker/containers/ with no size and no age limit
+     unless /etc/docker/daemon.json sets one. Section 9's retention sentence is
+     scoped to nginx's access and error logs, which is accurate and was written
+     that way deliberately — but it is a third log nobody had bounded. Decide
+     what those lines actually contain (user IDs? addresses?), then either bound
+     them and widen the sentence, or say here why they do not need it. Do not
+     widen the sentence first.
 
   DO NOT SOFTEN THESE. They are true, they are unusual to admit, and a policy
   that contradicts the code is worse than no policy:
@@ -688,28 +717,38 @@
             same information before we do, for the reasons in section 13.
           </p>
           <p>
-            <strong>How long that log is kept, honestly: we do not yet
-            enforce a period of our own.</strong> The file is rotated on the
-            host operating system's default schedule, which we have not
-            configured and therefore should not be describing to you as a
-            promise. The intention is fourteen days. Until we have actually set
-            that up, treat the honest answer as &ldquo;rotated on a default
-            schedule we have not verified&rdquo;, and when it is enforced this
-            paragraph will say so plainly instead. A policy that states a
-            retention period it does not implement is exactly the kind of thing
-            this document exists to avoid.
+            <strong>How long those logs are kept: fourteen days.</strong> Both
+            the access log and the error log are rotated once a day, and a
+            rotated file is deleted fourteen days later &mdash; by a
+            configuration we deploy and can point at, not by whatever schedule
+            the host operating system happened to ship. Because rotation
+            happens daily, a line written just after one rotation survives a few
+            hours short of fifteen days: fourteen days is the ceiling on a
+            rotated file, not a claim about the file being written right now.
+            This is also the only expiry on the tokens the error log can record,
+            which is the caveat above: they go when the file goes, within a
+            fortnight, whether or not anyone remembers to look. Rotation bounds
+            that exposure; it does not remove it. The fix that does is taking
+            the token out of the address in the first place, which is in
+            progress.
           </p>
           <p>
             <strong>Backups.</strong> We back up
             <code>chat.bsfchat.com</code> and <code>id.bsfchat.com</code>. A
             backup contains everything described in section 4, in plain text.
-            <strong>There is no automatic schedule and no automatic
-            expiry.</strong> Backups are taken by hand and deleted by hand: the
-            script that makes them has no timer behind it and no rule that
-            removes old ones. The intention is a nightly backup kept for thirty
-            days, and this paragraph will say so once that is true. Until then,
-            assume a backup of your data may exist for longer than thirty days,
-            and read the deletion limits in section 10 with that in mind.
+            <strong>One backup is taken every night and kept for thirty
+            days.</strong> The expiry is part of the backup job rather than a
+            separate tidy-up: it deletes anything thirty days old or older
+            before it writes that night's copy, so old data is removed even on a
+            night when the backup itself fails. At any moment there are about
+            thirty nightly copies and the oldest is under thirty days old.
+            Two things we would rather state than have you assume. These
+            archives sit on the same machine as the server and are not
+            encrypted, so the paragraph above about anyone who can read the
+            server's disk covers them too &mdash; getting them off that machine
+            and encrypted is work we have not finished. And a backup taken
+            before you deleted something still contains it until it ages out,
+            which is what the limits in section 10 are referring to.
           </p>
           <p>
             <strong>No security is perfect.</strong> This is a small project. If
