@@ -137,16 +137,50 @@
      an oracle for whether an address has an account. The code notes this
      (identity AccountHandler.cpp, security audit L2). Not mentioned on the
      page; worth closing when email verification lands.
- 18. CONTAINER LOGS ARE UNBOUNDED, and section 9's fourteen days does not cover
-     them. deploy/docker-compose.yml sets no `logging` options, so Docker's
-     default json-file driver keeps the chat server's and identity service's own
-     output under /var/lib/docker/containers/ with no size and no age limit
-     unless /etc/docker/daemon.json sets one. Section 9's retention sentence is
-     scoped to nginx's access and error logs, which is accurate and was written
-     that way deliberately — but it is a third log nobody had bounded. Decide
-     what those lines actually contain (user IDs? addresses?), then either bound
-     them and widen the sentence, or say here why they do not need it. Do not
-     widen the sentence first.
+ 18. CONTAINER LOGS: bounded 2026-09-28, and section 9 now covers them — but
+     WITHOUT a number of days, and that is the whole point of this note.
+     deploy/docker-compose.yml now sets a `logging:` block per service
+     (json-file, max-size x max-file = 30 MB each). Before it, Docker's default
+     driver kept the chat server's and identity service's own output under
+     /var/lib/docker/containers/ with no size and no age limit.
+     WHAT THE LINES CONTAIN, since this note asked and the answer decided the
+     wording: account identifiers throughout — every login, registration,
+     password change, room create and join, kick, ban, invite, voice join and
+     leave, media upload, and both parties to every report — plus room ids,
+     usernames on identity account creation, the OIDC subject, and nicknames as
+     user-authored free text. Both services log at `info` and THE LEVEL IS NOT
+     CONFIGURABLE: init_logger("info") is a literal in each main.cpp, no config
+     key, no flag. So this is a per-account timeline of when somebody was
+     online and who they were with, which is why section 9 now describes it
+     instead of leaving it out.
+     What is NOT in them, each checked rather than assumed: no message content;
+     no tokens, secrets or password hashes; and NO FULL IP ADDRESSES — every
+     address goes through a redactor that truncates IPv4 to /24 and IPv6 to
+     /64 first. That last one is what lets section 9 keep saying the nginx log
+     is the one place a full address is written down. If anyone ever removes
+     that redactor, that sentence becomes false.
+     WHY NO PERIOD IS CLAIMED, and do not "tidy this up" by adding one. Docker's
+     json-file driver takes max-size, max-file and compress and NOTHING ELSE —
+     max-age and max-file-age are rejected by the daemon as unknown options.
+     A size cap is not a retention period: a busy server drops lines within
+     days, and a quiet one keeps them for months. A small instance is the quiet
+     case, so a "fourteen days" here would be false in exactly the normal
+     situation. Same shape as the notifempty trap in logrotate/nginx — the
+     mechanism retains most on the deployments producing least.
+     TO CLAIM FOURTEEN DAYS you must first switch the driver to journald and set
+     MaxRetentionSec=14d via a drop-in on the host; the exact steps are in
+     deploy/README.md, "Container logs". Do that, and section 9's container-log
+     paragraph can say fourteen days alongside the nginx one. Until then it says
+     what is true, which is a size.
+     STILL OPEN, and not fixed by any of the above: coturn writes nothing to
+     stdout, so none of this reaches it. It falls back to
+     /var/tmp/turn_<pid>_<date>.log INSIDE the container, which nothing rotates
+     and no backup captures, cleared only when the container is recreated. At
+     the configured verbosity it holds startup lines and the server's own
+     addresses — no client addresses, no usernames, no session lines. Adding
+     `verbose` to turnserver.conf would create an unbounded in-container record
+     of which addresses called which, and would make section 9's full-address
+     sentence wrong. Don't.
 
   DO NOT SOFTEN THESE. They are true, they are unusual to admit, and a policy
   that contradicts the code is worse than no policy:
@@ -731,6 +765,43 @@
             that exposure; it does not remove it. The fix that does is taking
             the token out of the address in the first place, which is in
             progress.
+          </p>
+          <p>
+            <strong>The chat server's own log.</strong> Separately from nginx,
+            the chat server and the sign-in service each write a running log of
+            what they are doing, and it is worth being specific about what that
+            means, because it is more about you than the phrase suggests. It
+            records an entry for each sign-in, registration and password change;
+            for each channel you create or join; for each kick, ban or
+            invitation, naming both people; for each time you join or leave a
+            voice channel; for each file you upload; and for each report, naming
+            both the person who filed it and the person it is about. Put
+            together, that is a record of when you were online, which channels
+            you were in, who you shared a voice channel with, and who you
+            reported.
+            Three things it does not contain, which we checked rather than
+            assumed. It never contains the text of your messages. It never
+            contains a password or a sign-in token. And it never contains your
+            full IP address: every address is cut down before it is written, to
+            the first three quarters of an IPv4 address or the first half of an
+            IPv6 one, which is enough to recognise a network and not enough to
+            pick out a household. That is why the paragraph above can still say
+            nginx is the one place your full address is written down.
+          </p>
+          <p>
+            <strong>How long that one is kept: we will not give you a number of
+            days, and here is why.</strong> We have put a ceiling on it &mdash;
+            about 30 MB per service, after which the oldest entries are dropped
+            to make room &mdash; so it can no longer grow without limit, which
+            it previously could. But that is a ceiling on <em>size</em>, not on
+            <em>age</em>, and the software underneath offers us no way to set
+            one on age. What that means in practice is the opposite of what you
+            might guess: on a <em>busy</em> server, entries are pushed out within
+            days, and on a <em>quiet</em> one they can sit there for months. We
+            would rather tell you that than round it off to a number that sounds
+            reassuring and would be wrong in the ordinary case. If we later move
+            this log onto something that can expire on a clock, this paragraph
+            will say fourteen days like the one above, and not before.
           </p>
           <p>
             <strong>Backups.</strong> We back up
