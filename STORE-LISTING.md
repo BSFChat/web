@@ -20,6 +20,12 @@ but the *server* side of reporting is not, and that is now the only hard gate
 (§0.6) rather than settled unilaterally. Play needs four foreground-service
 declarations, not three (§0.7).
 
+> **Update 2026-09-29 — for the Google Play upload, use `PLAY-SUBMISSION.md`
+> in this directory.** It is the Console-order walkthrough for the first Play
+> upload, checked against the live privacy policy and the `v0.0.48-rc.8`
+> bundle, and it corrects four answers in this file (its §7 lists them). This
+> file remains the reference for the Apple side and for the decisions in §0.
+
 Companion pages, all on branch `docs/store-submission` in this repo:
 
 | Field the stores ask for | URL |
@@ -108,6 +114,16 @@ above — it is a real feature and reviewers do not test audio quality — but i
 your claim to make.
 
 ### 0.3 The server-side report endpoint is still unmerged. This is the one hard blocker. (highest risk)
+
+> **Cleared 2026-09-29.** `server` main is now `f53c2ad` ("Merge pull request #3
+> from BSFChat/feat/ugc-safety") and `src/api/ReportHandler.cpp` is on main. All
+> three routes answer **401** on `chat.bsfchat.com` against a **404** control, so
+> they are mounted and behind auth. Two caveats in `PLAY-SUBMISSION.md` §7.1: the
+> merge is in no server tag, so production is running an untagged `:sha` build
+> that could not be identified from outside; and nobody has filed an
+> authenticated report end-to-end yet. The rest of this section is kept for the
+> record.
+
 
 The client half of blocking, reporting and account deletion **is** merged into
 the integration branch — `qml/components/BlockedUsersDialog.qml`,
@@ -299,7 +315,7 @@ say plainly that it keeps the Matrix sync connection open to deliver messages
 | *(alternative, if you want keyword weight)* | `BSFChat: Self-Hosted Chat` | 30 |
 | **Subtitle** | `Self-hosted chat, no tracking` | 30 |
 | **Category** | Primary: **Social Networking**. Secondary: **Productivity** | |
-| **Age rating** | expect **12+** — see §6.3 | |
+| **Age rating** | **13+** — Apple's bands are now 4+/9+/13+/16+/18+; there is no 12+. See §6. | |
 | **Price** | Free, no in-app purchases (there is no purchase code in the tree) | |
 | **Privacy Policy URL** | `https://bsfchat.com/privacy` | |
 | **Support URL** | `https://bsfchat.com/support` | |
@@ -873,7 +889,7 @@ not only in-app.
 | Can users request account deletion? | Yes |
 | In-app path | `... menu → Your profile → Delete account` (type the username; password too, for password accounts) |
 | Web URL | `https://bsfchat.com/support` |
-| Is any data retained after deletion, and why? | Yes — messages the user sent remain in the conversations they were part of, along with the display name recorded in historical membership events, because a group conversation belongs to all its participants. Moderation and audit records are retained. Backups age out within 30 days. Explained at `https://bsfchat.com/privacy#deletion`. |
+| Is any data retained after deletion, and why? | **Superseded — do not paste this row.** It claims "Backups age out within 30 days", which `/privacy` §9 contradicts ("no automatic schedule and no automatic expiry … taken by hand and deleted by hand"), and it omits the fact that deleting a chat-server account does not delete a BSFChat ID (`/privacy` §6). Corrected text: **`PLAY-SUBMISSION.md` §5.8**. |
 
 ---
 
@@ -897,7 +913,7 @@ questionnaire changes).
 | Does the app contain ads? | **No** | |
 | Does the app provide unrestricted access to the internet (a browser)? | **No** | No WebView, WebEngine or in-app browser. Links open in the system browser, which IARC does not count. |
 | Is user-generated content moderated? | **Yes** | Per-server administrators, plus in-app reporting and blocking. Note in free text that moderation is by each server's operator, since the app is self-hosted. **Only answer Yes once the server-side report endpoint of §0.3 is deployed** — until then the Report button 404s and the answer is not true. |
-| Is the app directed at children? | **No** | Minimum age 13 (16 in UK/EEA) in the terms. |
+| Is the app directed at children? | **No** | Minimum age **13** in `/terms` §3 and `/privacy` §11. (The "16 in UK/EEA" that used to be here appears on neither page — do not repeat it in either Console.) |
 | Does the app share data with third parties? | **No** | |
 | Does the app collect precise location? | **No** | |
 
@@ -915,7 +931,7 @@ answers that matter:
 | **App allows users to communicate / user-generated content** | **Yes**, and select **frequent/intense** for "Mature/Suggestive Themes" only if you believe it; for a general chat client, "None" on the content categories plus the UGC flag is the honest combination |
 | Gambling / Contests | No |
 | Medical/Treatment Info, Alcohol Tobacco Drugs, Horror, Violence, Sexual Content, Profanity | **None** |
-| Age Rating outcome | expect **12+** |
+| Age Rating outcome | **13+** (Apple's current bands are 4+/9+/13+/16+/18+ — the old 12+ band no longer exists) |
 
 Apple will also ask, in the same flow, whether the app has **age verification**
 — it does not, and that is fine at 12+.
@@ -926,7 +942,9 @@ Apple will also ask, in the same flow, whether the app has **age verification**
 
 Ordered so that nothing waits on something further down. The full end-to-end
 runbook, including every CI step and both upload paths, is
-`client/docs/store-submission-runbook.md` — this list is the paperwork subset.
+`client/docs/android-release.md` (Android) and `client/docs/ios-release.md`
+(iOS). **Note:** earlier drafts pointed at `client/docs/store-submission-runbook.md`,
+which has never existed.
 
 **Blockers (nothing ships until these are true)**
 
@@ -963,7 +981,8 @@ runbook, including every CI step and both upload paths, is
 - [ ] Answer the App Store Connect export-compliance questions; expect them,
       because `ITSAppUsesNonExemptEncryption` is `true` (§0.8).
 
-**Screenshots** (shot lists: `client/docs/store-submission-runbook.md` §8)
+**Screenshots** (Play shot list: `PLAY-SUBMISSION.md` §8.4. The
+`client/docs/store-submission-runbook.md` this used to cite does not exist.)
 
 - [ ] iPhone 6.9" set — **must come off a real device**, and the set now
       includes a voice channel, which the earlier draft told you to avoid.
