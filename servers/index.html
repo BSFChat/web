@@ -1,0 +1,120 @@
+<!doctype html>
+<!--
+  Linked from the app's "Join a server" screen ("How servers work"). Keep it
+  short and true to the code: every claim here should be checkable against
+  the identity service (id_token claims: sub, name, picture; email only with
+  the email scope, which the app does not request), the chat server, and the
+  client (refresh token in the OS credential store only). The full policy for
+  the servers we run is /privacy.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How servers work — BSFChat</title>
+    <meta
+      name="description"
+      content="What happens when you join a BSFChat server with your BSFChat ID: what the server learns about you, what its operators can see, and what stays on your device."
+    />
+    <meta name="theme-color" content="#1e1f22" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">
+          <span class="brand-glyph" aria-hidden="true">B</span>
+          <span class="brand-word">BSFChat</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/#features">Features</a>
+          <a href="/#download">Download</a>
+          <a href="/support">Support</a>
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="doc">
+        <div class="container">
+          <h1>How servers work</h1>
+          <p class="doc-meta">What joining a server means for your privacy</p>
+
+          <p>
+            Your <strong>BSFChat ID</strong> is your account: your username,
+            password, two-step sign-in and the list of servers you have joined,
+            so your other devices can find them. It does not see your messages.
+          </p>
+          <p>
+            A <strong>server</strong> is where the conversation lives: its
+            channels, messages, files and calls. Every server is run by someone
+            &mdash; us at <code>chat.bsfchat.com</code>, or anyone else who runs
+            the software. Joining one means trusting whoever runs it.
+          </p>
+
+          <h2>What a server learns when you join</h2>
+          <ul>
+            <li>An identifier for your BSFChat ID, your display name and your profile picture.</li>
+            <li>Not your password and not your email address. The app never sends either.</li>
+            <li>Your IP address, as with any website you connect to.</li>
+            <li>Everything you post there: messages, files, reactions, and who you call.</li>
+          </ul>
+
+          <h2>What the people who run it can do</h2>
+          <ul>
+            <li>
+              Read your messages and files on their server. BSFChat messages are
+              not end-to-end encrypted.
+            </li>
+            <li>
+              Keep or delete what is stored there on their own terms. Their
+              rules apply, not ours, except on the servers we run, which follow
+              our <a href="/privacy">privacy policy</a>.
+            </li>
+            <li>Remove you from the server.</li>
+          </ul>
+          <p>
+            Only join servers you trust. If you are unsure, ask whoever runs it
+            how they handle your data.
+          </p>
+
+          <h2>What stays on your device</h2>
+          <ul>
+            <li>A sign-in for each server you have joined.</li>
+            <li>
+              Your BSFChat ID sign-in, kept in your system's secure credential
+              store (Keychain on Apple devices, Credential Manager on Windows,
+              the Secret Service on Linux, the Android Keystore on Android) and
+              only on this device. If your system has no secure store, the app
+              keeps it only until you quit.
+            </li>
+          </ul>
+
+          <h2>Leaving</h2>
+          <p>
+            Removing a server in the app signs this device out of it and takes
+            it off your BSFChat ID's server list. What you already posted stays
+            on that server unless you delete it there.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; 2026 BSFChat contributors.</p>
+        <p>
+          <a href="/privacy">Privacy</a>
+          &nbsp;·&nbsp;
+          <a href="/terms">Terms</a>
+          &nbsp;·&nbsp;
+          <a href="/support">Support</a>
+          &nbsp;·&nbsp;
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
