@@ -4,6 +4,18 @@
 `STORE-LISTING.md`, which covers both stores; this one covers *only* the first
 Play upload and is written to be worked through top to bottom in one sitting.
 
+> [!CAUTION]
+> **NEVER COMMIT THE DEMO ACCOUNT'S REAL PASSWORD (or username) TO THIS FILE.**
+> This repo is public on GitHub *and* its clone is the bsfchat.com web root, so
+> anything written here is published (this file was fetchable at
+> `https://bsfchat.com/PLAY-SUBMISSION.md` until the nginx rules in
+> `nginx-bsfchat.com.conf.example` deny `*.md`, and git history keeps it
+> forever even after a later edit). Leave every `<fill in>` below as it is and
+> type the real credentials **only into the Play Console** (App access, §5.2,
+> and the reviewer-instructions box, §8.5). Keep the password in your password
+> manager. If it is ever committed, change the password on `chat.bsfchat.com`
+> straight away; deleting the line does not un-publish it.
+
 Prepared 2026-09-29 against:
 
 | Thing | Value | How it was checked |
@@ -434,7 +446,7 @@ set:
 | --- | --- |
 | Name | `Sign in to the public BSFChat server` |
 | Username | *(the demo account from §1)* |
-| Password | *(ditto)* |
+| Password | *(ditto — type it into the Play Console only; never write it in this file, see the warning at the top)* |
 | Any other information | See the block in §8.5 — paste the sign-in steps there |
 
 ### 5.3 Target audience and content
@@ -866,6 +878,9 @@ this. Capture at the device's native resolution; a 1080 × 2340 phone gives
 Reviewer instructions — verified against the app's actual navigation as
 described in `/support` and `STORE-LISTING.md` §5.2, with the retention line
 corrected and the BSFChat ID caveat added:
+
+**Paste this into the Play Console and fill in the username and password
+there. Do not fill them in here** — see the warning at the top of this file.
 
 ```
 BSFChat is a client for self-hosted chat servers. Messages live on a server the

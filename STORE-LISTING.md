@@ -4,6 +4,15 @@
 not part of the site and is not linked from anywhere. It is working material for
 filling in App Store Connect and the Google Play Console.
 
+> [!CAUTION]
+> **"Not published" is not true of the repo: it is public on GitHub, and its
+> clone is the bsfchat.com web root** (this file was fetchable at
+> `https://bsfchat.com/STORE-LISTING.md` until the nginx rules in
+> `nginx-bsfchat.com.conf.example` deny `*.md`). **Never fill in the demo
+> account's username or password here** (§5). Type them only into App Store
+> Connect and the Play Console; git history would keep a committed password
+> forever.
+
 **Drafted by an AI assistant on 2026-09-23, then reviewed and substantially
 corrected by a second one the same day.** Both read `client`, `server`,
 `identity` and `deploy`; every factual claim is cited so you can re-run the
