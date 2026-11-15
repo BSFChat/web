@@ -20,6 +20,9 @@
 #        curl -sI https://bsfchat.com/privacy                -> 301, Location: /privacy/
 #        curl -sI https://bsfchat.com/                       -> 200 with the headers below
 #        curl -sI https://bsfchat.com/.well-known/matrix/client -> 200 application/json
+#        curl -sI https://bsfchat.com/.well-known/apple-app-site-association -> 200 application/json, no redirect
+#        curl -sI https://bsfchat.com/.well-known/assetlinks.json -> 200 application/json, no redirect
+#        curl -sI https://bsfchat.com/oauth/callback         -> 301, Location: /oauth/callback/
 #
 # Not tested with `nginx -t` (no nginx where this was written). It is plain,
 # widely used syntax, but run step 2 before trusting it.

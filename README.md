@@ -44,3 +44,46 @@ clone.
 
 `docs/` holds owner notes that used to sit in HTML comments on the legal and
 support pages. They are not linked from the site.
+
+## Mobile sign-in: app-link files
+
+The mobile app signs in through `https://bsfchat.com/oauth/callback`, a
+verified app link, instead of the `bsfchat://` scheme any app could claim. The
+OS hands that URL to the app only if this domain vouches for it:
+
+* [`.well-known/assetlinks.json`](.well-known/assetlinks.json) (Android App
+  Links) for package `com.bsfchat.app`.
+* [`.well-known/apple-app-site-association`](.well-known/apple-app-site-association)
+  (iOS) for `<Team ID>.com.bsfchat.app`: `applinks` scoped to
+  `/oauth/callback*` (the rest of the site stays in the browser) and
+  `webcredentials`, which is what `ASWebAuthenticationSession` checks.
+* [`oauth/callback/`](oauth/callback/index.html), the page shown only when
+  the OS did not hand the redirect to the app. No script, no external
+  resources, no referrer; keep it that way (see the comment in the file).
+
+`com.bsfchat.app` is the release bundle id and Android application id
+(`BSFCHAT_BUNDLE_ID` in the client's `CMakeLists.txt`). Debug builds use
+`com.bsfchat.app.dev` and are deliberately not listed, so they cannot complete
+the verified sign-in.
+
+No mobile app is published yet, so both files carry placeholders. Until they
+are filled in, verification fails closed: the callback opens in the browser,
+on the page above, and sign-in does not complete. Fill in before the first
+mobile release:
+
+| Placeholder | File | Where to get it |
+| --- | --- | --- |
+| `REPLACE_WITH_PLAY_APP_SIGNING_KEY_SHA256` | `assetlinks.json` | Play Console → the app → Test and release → **App integrity** → App signing → **App signing key certificate** → SHA-256 certificate fingerprint (colon-separated hex, e.g. `14:6D:E9:…`). Use Google's app-signing key, not the upload key. To also verify sideloaded CI builds, add the **upload key certificate** SHA-256 from the same page as a second array entry. |
+| `REPLACE_APPLE_TEAM_ID` (both occurrences) | `apple-app-site-association` | Apple Developer (developer.apple.com/account) → **Membership details** → **Team ID** (10 characters, e.g. `ABCDE12345`). |
+
+Both files must stay valid JSON; check with
+`python3 -m json.tool .well-known/assetlinks.json` and the same for the AASA.
+After deploying, `adb shell pm get-app-links com.bsfchat.app` should show
+`bsfchat.com: verified`.
+
+`apple-app-site-association` has no extension, and Apple requires it to be
+served as `application/json` without redirects. The nginx example has a
+`location = /.well-known/apple-app-site-association` block with
+`default_type application/json` for exactly this; it only takes effect once
+that config is applied on the host. Check with the `curl` lines at the top of
+the example.
