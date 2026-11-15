@@ -141,6 +141,8 @@ h3 { font-size: 1.1rem; font-weight: 600; }
 p { color: var(--text-muted); margin: 0 0 1rem; }
 
 .lede { font-size: 1.15rem; max-width: 40rem; margin-bottom: 2rem; }
+.lede a { color: var(--accent); }
+.lede a:hover { text-decoration: underline; }
 .section-lede { max-width: 40rem; margin-bottom: 2rem; }
 
 .hero { padding: 5rem 0 4rem; }
