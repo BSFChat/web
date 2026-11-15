@@ -1,0 +1,39 @@
+<!doctype html>
+<!--
+  The mobile sign-in's redirect target (identity [apps] mobile_redirect_uri,
+  client oidc::kNativeRedirectUri). On a phone with BSFChat installed and the
+  domain verified, the OS hands this URL straight to the app and this page is
+  never loaded. It loads only when that did not happen: the app is not
+  installed, or verification failed (.well-known/assetlinks.json or
+  apple-app-site-association missing or wrong).
+
+  The query string carries an authorization code. It is useless without the
+  app's PKCE verifier, but it is still not passed on: no scripts, no external
+  resources, and no-referrer, so nothing on this page sends the URL anywhere.
+  Do NOT add analytics, a "continue in app" redirect to bsfchat://, or any
+  script here. A bounce to the custom scheme would hand the code to whichever
+  app claims bsfchat://, which is the hole the https redirect exists to close.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" />
+    <title>Finish signing in — BSFChat</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 32rem; margin: 4rem auto; padding: 0 1.25rem; line-height: 1.5; }
+      h1 { font-size: 1.4rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Return to the BSFChat app</h1>
+    <p>This page is where the BSFChat app finishes signing in. If you are seeing it, your phone opened the sign-in link in the browser instead of in the app.</p>
+    <ul>
+      <li>Make sure the BSFChat app is installed and up to date, then start signing in again from inside the app.</li>
+      <li>If it keeps happening, contact <a href="/support/">support</a>.</li>
+    </ul>
+    <p>You can close this tab. Nothing has been signed in from this page.</p>
+  </body>
+</html>
