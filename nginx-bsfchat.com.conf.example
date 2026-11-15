@@ -1,0 +1,151 @@
+# nginx config for bsfchat.com — EXAMPLE, apply by hand on the host.
+#
+# This repo is cloned straight into the web root (/var/www/bsfchat.com) and
+# updated with `git pull`, so without the rules below nginx serves every file
+# in it: /.git/ (the whole history), README.md, STORE-LISTING.md,
+# PLAY-SUBMISSION.md, docs/, and this file. This file contains no secrets;
+# it is served too until it has been applied, which is acceptable.
+#
+# How to apply:
+#   1. Merge the directives below into the EXISTING `server { listen 443 ... }`
+#      block for bsfchat.com. Keep your own listen / ssl_certificate /
+#      ssl_certificate_key / log lines; replace any existing `location /`,
+#      `root`, `index`, `error_page` and add_header lines for this vhost.
+#   2. sudo nginx -t && sudo systemctl reload nginx
+#   3. Check (all should hold):
+#        curl -sI https://bsfchat.com/.git/config            -> 404
+#        curl -sI https://bsfchat.com/README.md              -> 404
+#        curl -sI https://bsfchat.com/docs/privacy-owner-notes.md -> 404
+#        curl -sI https://bsfchat.com/nope                   -> 404, BSFChat page
+#        curl -sI https://bsfchat.com/privacy                -> 301, Location: /privacy/
+#        curl -sI https://bsfchat.com/                       -> 200 with the headers below
+#        curl -sI https://bsfchat.com/.well-known/matrix/client -> 200 application/json
+#
+# Not tested with `nginx -t` (no nginx where this was written). It is plain,
+# widely used syntax, but run step 2 before trusting it.
+#
+# IMPORTANT, nginx add_header inheritance: a location block that has ANY
+# add_header of its own drops ALL add_header lines from the server block. That
+# is why the security headers are repeated in the /.well-known/matrix/
+# location below, which adds a CORS header. If you add a location with its
+# own add_header, repeat the security headers there too.
+
+server {
+    # listen 443 ssl; http2 on; server_name bsfchat.com;   <- keep yours
+    # ssl_certificate ...; ssl_certificate_key ...;        <- keep yours
+    #   With Cloudflare SSL mode "Full (strict)" this must be a certificate
+    #   Cloudflare trusts: a Cloudflare Origin CA cert, or a public one.
+
+    root  /var/www/bsfchat.com;
+    index index.html;
+    charset utf-8;
+
+    # Do not advertise the nginx version (shown on the default error pages).
+    server_tokens off;
+
+    # The trailing-slash redirect (/privacy -> /privacy/) currently goes to
+    # http://bsfchat.com/privacy/. A relative Location header avoids that
+    # whatever scheme or port the origin was reached on.
+    absolute_redirect off;
+    port_in_redirect  off;
+
+    # ---- Security headers ---------------------------------------------------
+    # HSTS with includeSubDomains: every *.bsfchat.com name must serve HTTPS
+    # (DNS is a wildcard and Cloudflare-proxied, so they do). Set HSTS here OR
+    # in Cloudflare (SSL/TLS -> Edge Certificates -> HSTS), not both, or
+    # browsers receive two headers. Do not add `preload` unless you mean to
+    # submit to the preload list; it is very hard to undo.
+    #
+    # CSP: the site has no script, no inline style, and loads only its own CSS,
+    # font (/fonts/Geist-Variable.woff2) and favicon. The one script a visitor
+    # gets is Cloudflare's Email Address Obfuscation decoder, which Cloudflare
+    # injects as an external script from this origin
+    # (/cdn-cgi/scripts/.../email-decode.min.js) and which uses no eval, so
+    # script-src 'self' covers it. If Cloudflare features that inject INLINE
+    # script are turned on (Rocket Loader, Bot Fight Mode / JS detections,
+    # Web Analytics auto-injection) the browser will block that script and log
+    # a CSP violation; the pages still work.
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()" always;
+    add_header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests" always;
+
+    # ---- Error page -----------------------------------------------------------
+    error_page 404 /404.html;
+    location = /404.html {
+        internal;
+    }
+
+    # ---- Site -----------------------------------------------------------------
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # ---- Never serve the repo's own files -------------------------------------
+    # Dotfiles and dot-directories: /.git/, /.gitignore, /.github/, ...
+    # Answer 404 rather than 403 so nothing confirms what exists.
+    location ~ /\. {
+        return 404;
+    }
+
+    # Owner notes and store/submission paperwork: docs/, *.md, and this file.
+    location ^~ /docs/ {
+        return 404;
+    }
+    location ~* \.(md|example)$ {
+        return 404;
+    }
+
+    # ---- .well-known ----------------------------------------------------------
+    # `=` and `^~` make these win over the dotfile regex above.
+    # The files are extensionless, so give them a JSON type explicitly.
+
+    # Matrix client discovery: clients fetch this cross-origin, so it needs CORS.
+    location ^~ /.well-known/matrix/ {
+        default_type application/json;
+        add_header Access-Control-Allow-Origin "*" always;
+        # repeated security headers (see the inheritance note at the top)
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Content-Security-Policy "default-src 'none'; frame-ancestors 'none'" always;
+        try_files $uri =404;
+    }
+
+    # Everything else under /.well-known/ (assetlinks.json,
+    # apple-app-site-association). Apple requires application/json for AASA
+    # and fetches it without following redirects.
+    location = /.well-known/apple-app-site-association {
+        default_type application/json;
+        try_files $uri =404;
+    }
+    location ^~ /.well-known/ {
+        try_files $uri =404;
+    }
+}
+
+# If port 80 is still open on the origin, make it redirect rather than serve:
+#
+# server {
+#     listen 80;
+#     server_name bsfchat.com;
+#     server_tokens off;
+#     return 301 https://bsfchat.com$request_uri;
+# }
+#
+# ---- Cloudflare dashboard (bsfchat.com zone) ----------------------------------
+# - SSL/TLS -> Overview: encryption mode "Full (strict)". The live
+#   /privacy -> http://bsfchat.com/privacy/ redirect suggests Cloudflare is
+#   currently reaching the origin over plain HTTP ("Flexible"). Under Full
+#   (strict) Cloudflare connects to the origin on 443 and checks its cert.
+# - SSL/TLS -> Edge Certificates: "Always Use HTTPS" on.
+# - Scrape Shield -> Email Address Obfuscation: this rewrites every mailto:
+#   link into /cdn-cgi/l/email-protection#... and injects a decoder script, so
+#   with JavaScript off the support/privacy/terms email links do not work.
+#   Recommended: turn it OFF (plain mailto: links, no script at all). The
+#   cost is that the addresses are trivially scrapeable. If you turn it off,
+#   update privacy policy section 13, which currently says this script runs
+#   (see docs/privacy-owner-notes.md item 11).
