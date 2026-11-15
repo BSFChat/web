@@ -135,34 +135,39 @@
         <div class="container">
           <h2>Run your own server</h2>
           <p>
-            The server ships as an OCI image on GHCR:
-            <code>ghcr.io/bsfchat/server:latest</code>. Pull it, point a
-            domain at the box, point <code>identity.provider_url</code> at
-            <code>https://id.bsfchat.com</code>, and you have a chat service
-            nobody can revoke.
-          </p>
-          <p>
-            Identity is federated on purpose: one account works across every
-            BSFChat server, so your users don't need a new login per server.
-            The default provider is <code>id.bsfchat.com</code>; any
-            OIDC-compliant provider works (including your own — the image is
-            <code>ghcr.io/bsfchat/identity:latest</code> if you want to run
-            one).
-          </p>
-          <p>
-            The reference <code>docker-compose.yml</code> lives in
-            <a href="https://github.com/BSFChat/server" rel="noopener"
-              >github.com/BSFChat/server</a
+            The server and identity provider ship as OCI images on GHCR
+            (<code>ghcr.io/bsfchat/server</code>,
+            <code>ghcr.io/bsfchat/identity</code>). The reference
+            <code>docker-compose.yml</code> lives in
+            <a href="https://github.com/BSFChat/deploy" rel="noopener"
+              >github.com/BSFChat/deploy</a
             >
-            — clone it, set a couple of env vars, bring it up.
+            and brings up the chat server, an OIDC identity provider and a
+            TURN relay for voice. You edit one file, <code>.env</code>;
+            <code>setup.sh</code> generates the rest from it.
           </p>
-          <pre><code>services:
-  server:
-    image: ghcr.io/bsfchat/server:latest
-    ports:
-      - "127.0.0.1:8448:8448"
-    environment:
-      BSFCHAT_IDENTITY_URL: https://id.bsfchat.com</code></pre>
+          <pre><code>git clone https://github.com/BSFChat/deploy.git /opt/bsfchat
+cd /opt/bsfchat
+cp .env.example .env
+$EDITOR .env        # CHAT_HOST, ID_HOST, TURN_HOST, TURN_EXTERNAL_IP
+./setup.sh          # renders config/*.toml and nginx/bsfchat.conf
+docker compose up -d</code></pre>
+          <p>
+            Both HTTP services bind to loopback, so put a reverse proxy in
+            front &mdash; <code>setup.sh</code> renders an nginx config for
+            it. The
+            <a href="https://github.com/BSFChat/deploy#readme" rel="noopener"
+              >deploy README</a
+            >
+            covers that, TLS, backups and the two settings people get wrong.
+          </p>
+          <p>
+            Identity is federated on purpose: one account can work across
+            every BSFChat server, so your users don't need a new login per
+            server. The deploy stack runs its own provider at your
+            <code>ID_HOST</code>; any OIDC-compliant provider works, including
+            the shared one at <code>id.bsfchat.com</code>.
+          </p>
         </div>
       </section>
     </main>
