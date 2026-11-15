@@ -9,7 +9,8 @@
 
   The query string carries an authorization code. It is useless without the
   app's PKCE verifier, but it is still not passed on: no scripts, no external
-  resources, and no-referrer, so nothing on this page sends the URL anywhere.
+  resources (only this site's own CSS, font and favicon), and no-referrer,
+  so nothing on this page sends the URL anywhere, including via its links.
   Do NOT add analytics, a "continue in app" redirect to bsfchat://, or any
   script here. A bounce to the custom scheme would hand the code to whichever
   app claims bsfchat://, which is the hole the https redirect exists to close.
@@ -20,20 +21,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" />
+    <!-- Belt and braces until the nginx example is applied: own-origin CSS,
+         font and favicon only, no script. The nginx header CSP is stricter
+         elsewhere and allows the same here; a browser enforces both. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'" />
     <title>Finish signing in — BSFChat</title>
-    <style>
-      body { font-family: system-ui, sans-serif; max-width: 32rem; margin: 4rem auto; padding: 0 1.25rem; line-height: 1.5; }
-      h1 { font-size: 1.4rem; }
-    </style>
+    <meta name="theme-color" content="#1e1f22" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <h1>Return to the BSFChat app</h1>
-    <p>This page is where the BSFChat app finishes signing in. If you are seeing it, your phone opened the sign-in link in the browser instead of in the app.</p>
-    <ul>
-      <li>Make sure the BSFChat app is installed and up to date, then start signing in again from inside the app.</li>
-      <li>If it keeps happening, contact <a href="/support/">support</a>.</li>
-    </ul>
-    <p>You can close this tab. Nothing has been signed in from this page.</p>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">
+          <span class="brand-glyph" aria-hidden="true">B</span>
+          <span class="brand-word">BSFChat</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/#features">Features</a>
+          <a href="/#download">Download</a>
+          <a href="/support/">Support</a>
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="doc">
+        <div class="container">
+          <h1>Return to the BSFChat app</h1>
+          <p>This page is where the BSFChat app finishes signing in. If you are seeing it, your phone opened the sign-in link in the browser instead of in the app.</p>
+          <ul>
+            <li>Make sure the BSFChat app is installed and up to date, then start signing in again from inside the app.</li>
+            <li>If it keeps happening, contact <a href="/support/">support</a>.</li>
+          </ul>
+          <p>You can close this tab. Nothing has been signed in from this page.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; 2026 BSFChat contributors.</p>
+        <p>
+          <a href="/privacy/">Privacy</a>
+          &nbsp;·&nbsp;
+          <a href="/terms/">Terms</a>
+          &nbsp;·&nbsp;
+          <a href="/support/">Support</a>
+          &nbsp;·&nbsp;
+          <a href="https://github.com/BSFChat" rel="noopener">GitHub</a>
+        </p>
+      </div>
+    </footer>
   </body>
 </html>
