@@ -5,8 +5,7 @@
       "namespace": "android_app",
       "package_name": "com.bsfchat.app",
       "sha256_cert_fingerprints": [
-        "REPLACE:PLAY_APP_SIGNING_KEY_SHA256:Play_Console>Setup>App_signing",
-        "REPLACE:UPLOAD_KEY_SHA256_if_you_sideload_CI_builds_or_delete_this_line"
+        "REPLACE_WITH_PLAY_APP_SIGNING_KEY_SHA256"
       ]
     }
   }
