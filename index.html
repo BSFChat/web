@@ -95,7 +95,7 @@
             >
               <h3>macOS</h3>
               <p class="download-file">BSFChat-macOS.dmg</p>
-              <p class="download-version">@LATEST_TAG@</p>
+              <p class="download-version">Latest release</p>
             </a>
             <a
               class="tile tile-link download-tile"
@@ -104,7 +104,7 @@
             >
               <h3>Windows</h3>
               <p class="download-file">BSFChat-Setup.exe</p>
-              <p class="download-version">@LATEST_TAG@</p>
+              <p class="download-version">Latest release</p>
             </a>
             <a
               class="tile tile-link download-tile"
@@ -113,11 +113,17 @@
             >
               <h3>Linux</h3>
               <p class="download-file">BSFChat-linux-x86_64.tar.gz</p>
-              <p class="download-version">@LATEST_TAG@</p>
+              <p class="download-version">Latest release</p>
             </a>
           </div>
           <p class="download-meta">
-            Source, issues, releases →
+            Version number, release notes and older builds →
+            <a href="https://github.com/BSFChat/client/releases/latest" rel="noopener"
+              >github.com/BSFChat/client/releases</a
+            >
+          </p>
+          <p class="download-meta">
+            Source and issues →
             <a href="https://github.com/BSFChat" rel="noopener"
               >github.com/BSFChat</a
             >
@@ -177,17 +183,14 @@
     </footer>
 
     <!--
-      No script on this page any more, deliberately.
-
-      The version labels used to be filled in by a browser-side fetch of
-      the GitHub releases API. That handed every visitor's IP address and
-      User-Agent to a third party before they had clicked anything, on a
-      site whose entire pitch is "no tracking". The tag is substituted at
-      deploy time instead (see .github/workflows/deploy.yml), so what the
-      browser receives is static bytes from this origin and nothing else.
-
-      The copyright year is baked in rather than computed from the
-      visitor's clock, which was the only other reason for script here.
+      No script on this page, deliberately. Fetching the version from the
+      GitHub releases API in the browser would hand every visitor's IP and
+      User-Agent to a third party before they clicked anything. The download
+      links use GitHub's releases/latest/download/<asset> redirect, which
+      always resolves to the newest release, so the cards need no version
+      number to work; the exact version is one click away on the releases
+      page. Asset names must match the softprops/action-gh-release "files:"
+      list in BSFChat/client .github/workflows/ci.yml.
     -->
   </body>
 </html>
