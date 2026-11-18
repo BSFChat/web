@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["REPLACE_APPLE_TEAM_ID.com.bsfchat.app"],
+        "appIDs": ["V282S7K8TX.com.bsfchat.app"],
         "components": [
           { "/": "/oauth/callback*", "comment": "Mobile sign-in callback (oidc::kNativeRedirectUri) only; the rest of the site stays in the browser." }
         ]
@@ -10,6 +10,6 @@
     ]
   },
   "webcredentials": {
-    "apps": ["REPLACE_APPLE_TEAM_ID.com.bsfchat.app"]
+    "apps": ["V282S7K8TX.com.bsfchat.app"]
   }
 }
