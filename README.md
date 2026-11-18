@@ -73,7 +73,7 @@ mobile release:
 
 | Placeholder | File | Where to get it |
 | --- | --- | --- |
-| `REPLACE_WITH_PLAY_APP_SIGNING_KEY_SHA256` | `assetlinks.json` | Play Console → the app → Test and release → **App integrity** → App signing → **App signing key certificate** → SHA-256 certificate fingerprint (colon-separated hex, e.g. `14:6D:E9:…`). Use Google's app-signing key, not the upload key. To also verify sideloaded CI builds, add the **upload key certificate** SHA-256 from the same page as a second array entry. |
+| Play app signing SHA-256 (filled in) | `assetlinks.json` | Play Console → the app → Test and release → **App integrity** → App signing → **App signing key certificate** → SHA-256 certificate fingerprint (colon-separated hex, e.g. `14:6D:E9:…`). Use Google's app-signing key, not the upload key. To also verify sideloaded CI builds, add the **upload key certificate** SHA-256 from the same page as a second array entry. |
 | Apple Team ID (filled in: `V282S7K8TX`) | `apple-app-site-association` | Apple Developer (developer.apple.com/account) → **Membership details** → **Team ID** (10 characters, e.g. `ABCDE12345`). |
 
 Both files must stay valid JSON; check with
