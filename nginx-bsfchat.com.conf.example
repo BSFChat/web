@@ -60,14 +60,14 @@ server {
     # submit to the preload list; it is very hard to undo.
     #
     # CSP: the site has no script, no inline style, and loads only its own CSS,
-    # font (/fonts/Geist-Variable.woff2) and favicon. The one script a visitor
-    # gets is Cloudflare's Email Address Obfuscation decoder, which Cloudflare
-    # injects as an external script from this origin
-    # (/cdn-cgi/scripts/.../email-decode.min.js) and which uses no eval, so
-    # script-src 'self' covers it. If Cloudflare features that inject INLINE
-    # script are turned on (Rocket Loader, Bot Fight Mode / JS detections,
-    # Web Analytics auto-injection) the browser will block that script and log
-    # a CSP violation; the pages still work.
+    # font (/fonts/Geist-Variable.woff2) and favicon. Cloudflare's Email
+    # Address Obfuscation used to inject an external decoder script from this
+    # origin (/cdn-cgi/scripts/.../email-decode.min.js); it is to be OFF (see
+    # the end of this file). script-src 'self' is kept so that, if it is ever
+    # switched back on, the addresses still decode. If Cloudflare features
+    # that inject INLINE script are turned on (Rocket Loader, Bot Fight Mode /
+    # JS detections, Web Analytics auto-injection) the browser will block that
+    # script and log a CSP violation; the pages still work.
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
@@ -145,10 +145,11 @@ server {
 #   currently reaching the origin over plain HTTP ("Flexible"). Under Full
 #   (strict) Cloudflare connects to the origin on 443 and checks its cert.
 # - SSL/TLS -> Edge Certificates: "Always Use HTTPS" on.
-# - Scrape Shield -> Email Address Obfuscation: this rewrites every mailto:
-#   link into /cdn-cgi/l/email-protection#... and injects a decoder script, so
-#   with JavaScript off the support/privacy/terms email links do not work.
-#   Recommended: turn it OFF (plain mailto: links, no script at all). The
-#   cost is that the addresses are trivially scrapeable. If you turn it off,
-#   update privacy policy section 13, which currently says this script runs
-#   (see docs/privacy-owner-notes.md item 11).
+# - Scrape Shield -> Email Address Obfuscation: OFF (decided 2026-11-19, audit
+#   3). When on, it rewrites every mailto: link into
+#   /cdn-cgi/l/email-protection#... and injects a decoder script, so with
+#   JavaScript off the support/privacy/terms addresses read "[email protected]"
+#   and do not work. Off, they are plain mailto: links and the site serves no
+#   script at all, which is what privacy policy section 13 now says. The cost
+#   is that the addresses are trivially scrapeable. If it is ever turned back
+#   on, section 13 must change with it (docs/privacy-owner-notes.md item 11).
