@@ -138,3 +138,62 @@ public and to the GitHub Pages deploy, which has since been deleted.
   (section 7); attachment metadata such as photo GPS is not stripped
   (section 4).
 ```
+
+## 19 November 2026 update (audit 3, fix-first #2): judgement calls left open
+
+The policy, support page and store documents were brought in line with
+0.0.49 / server 0.0.53. What was changed is listed in privacy section 14. The
+statements below are facts that were checked against the code; the
+*decisions* are yours:
+
+1. **Apple and Google: processors or independent controllers?** Section 13
+   names them as companies "in the path" and says the data leaves the UK/EEA,
+   but deliberately does not call them processors. Firebase has Data
+   Processing Terms you can accept in the Firebase console; APNs has no
+   equivalent. Decide whether to accept the Firebase terms and list Google as
+   a processor, and how to describe Apple.
+2. **The gateway and other people's servers.** When a self-hosted server
+   allows push.bsfchat.com (the deploy template now does by default,
+   `PUSH_ENABLED=true`), we process notices about its users: room ids with
+   that server's name, event ids, unread counts, and names if they opted in.
+   Section 5 says so plainly. Not decided: whether we are controller or
+   processor for that, and which legal basis section 12 should give (it only
+   covers "our servers").
+3. **The hosting provider is not named.** Sections 9 and 13 say "object
+   storage with our hosting provider" (Contabo, S3-compatible). Decide whether
+   to name Contabo, and whether it belongs in the processor list next to
+   Cloudflare and Proton. The bucket is still named after another project
+   (audit 3, production).
+4. **Section 14 promised an in-app notice before push took effect.** Nothing
+   in the client shows one (searched the QML for a first-run or policy
+   notice). Section 14 now describes push as a change that has arrived, and
+   does not claim a notice was shown. Decide whether to add the notice or
+   accept the gap.
+5. **Play Data Safety.** Device or other IDs is answered collected *and
+   shared* for the FCM token, although Google's service-provider exemption
+   may make it "not shared". The names tier, which sends another user's
+   display name and the room name to Google, is not declared as sharing Name.
+   Both are written up in `PLAY-SUBMISSION.md` §3.3.
+6. **Things the text depends on that live outside this repo:**
+   - relay credentials "expire after a day" (section 7) is the server default
+     and the new deploy template; production `server.toml` files must not
+     still set `turn_ttl = 3600`;
+   - "the gateway has no database … does not keep it" (section 5) is true of
+     Sygnal; confirm its log config does not record request bodies or full
+     push keys;
+   - "the Android app contains Firebase Cloud Messaging" is true of builds
+     made with the four `FCM_*` CI variables set (`FCM_API_KEY` was still
+     pending in client `docs/push-notifications.md`); without them the APK
+     has no Firebase and the Android text overstates;
+   - iOS push needs the APNs key on the gateway (its iOS block is commented
+     out), and UAT/test have no `[push]` section, so store reviewers get no
+     push;
+   - section 13 says the site serves no script, which is true only once
+     Cloudflare's Email Address Obfuscation is off for the zone;
+   - section 13 says every server in section 1 is behind Cloudflare
+     (push.bsfchat.com, uat, test included); the DNS names are proxied, but
+     confirm.
+7. **Client copy, not this repo:** the "Show sender and room names" setting
+   says that with it off "Google/Apple learn nothing about who wrote or
+   where". The room id includes the server's name, so "where" is slightly
+   overstated (the policy says so correctly).
