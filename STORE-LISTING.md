@@ -35,6 +35,17 @@ declarations, not three (§0.7).
 > bundle, and it corrects four answers in this file (its §7 lists them). This
 > file remains the reference for the Apple side and for the decisions in §0.
 
+> [!IMPORTANT]
+> **Update 2026-11-19.** From 0.0.49 the apps have push notifications (APNs on
+> iPhone, Firebase Cloud Messaging on Android, both through BSFChat's gateway
+> `push.bsfchat.com`), link previews fetched by the chat server, sign-in tokens
+> in the Keychain / Android Keystore, and an in-app route to delete a BSFChat
+> ID. The privacy policy was rewritten for this the same day. This file has
+> been corrected where it said otherwise: §0.7, §0.8, §1.3, §2.3, §3, §4.1,
+> §5.1, §5.2, §5.3 and §7. For Play, `PLAY-SUBMISSION.md` remains the
+> reference and carries the same changes. Builds before 0.0.49 can no longer
+> sign in with a BSFChat ID on production, so submit 0.0.49 or later.
+
 Companion pages, all on branch `docs/store-submission` in this repo:
 
 | Field the stores ask for | URL |
@@ -262,10 +273,11 @@ There are four, because the voice service declares camera as well:
 | `SyncService` | `dataSync` | `:265-268` | A message arriving as a notification with the app backgrounded |
 | `MediaProjectionService` | `mediaProjection` | `:276-279` | The system screen-capture consent dialog, then a shared screen |
 
-`dataSync` is the one Google pushes back on hardest; the declaration text should
-say plainly that it keeps the Matrix sync connection open to deliver messages
-**without Firebase**, and that no third party is involved
-(`src/core/AndroidNotifier.cpp:309`).
+`dataSync` is the one Google pushes back on hardest. Since 0.0.49 notifications
+use Firebase Cloud Messaging by default, and `SyncService` runs only when the
+user turns on "Keep a background connection instead of push" or the phone has
+no Google Play services; the declaration text should say exactly that
+(`PLAY-SUBMISSION.md` §5.6 has it, ready to paste).
 
 ### 0.8 Smaller things that will bite
 
@@ -293,24 +305,20 @@ say plainly that it keeps the Matrix sync connection open to deliver messages
 - **iPhone only.** `XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"`
   (`CMakeLists.txt:701-702`). There is no iPad layout, so set the listing to
   iPhone only rather than letting it ship an upscaled iPad build.
-- **No push notifications on iOS — and in fact no OS-level notifications at
-  all.** There is no APNs, no PushKit, and `NotificationManager` only has a
-  `QSystemTrayIcon` path (desktop) and an `AndroidNotifier` path
-  (`src/core/NotificationManager.cpp:18`, `:38`). On iPhone, new messages appear
-  in the UI while the app is open and nowhere else. Worth a line in the
-  description so it does not read as a bug; the copy below has one.
-- **Link previews fetch third-party pages from the reader's device, with no
-  setting to turn them off.** `qml/components/LinkPreview.qml:337-377` issues a
-  raw `XMLHttpRequest` GET against any URL anyone posts, following up to three
-  redirects, capped at two per message (`qml/components/MessageBubble.qml:1381-1387`);
-  YouTube links additionally hit `youtube.com/oembed` and `img.youtube.com`
-  (`:386-390`, `:46`, `:158`). This discloses the **reader's** IP to any site a
-  **sender** links, which sits awkwardly beside the "Hide my IP address" voice
-  setting. The privacy policy already discloses it honestly (§8, "Link
-  previews") and the Data Safety free text below mentions it.
-  **[owner: decide]** whether to add a setting to disable link previews before
-  submitting. Not a blocker; reviewers will not find it. It is the kind of thing
-  someone writes a blog post about later.
+- **Push notifications on iOS (since 0.0.49).** APNs through BSFChat's gateway
+  `push.bsfchat.com`; `ios/BSFChat.entitlements` asks for
+  `aps-environment = production`, so the App Store profile needs the Push
+  Notifications capability (`client/docs/push-notifications.md`, "Owner
+  setup"). Payloads carry a room id, event id and unread count by default and
+  never message text; sender and room names only if the user opts in. The
+  gateway's iOS block needs the APNs auth key before any of this is delivered —
+  check that before review, or a reviewer who tests notifications sees none.
+- **Link previews are fetched by the chat server (since 0.0.49 / server
+  0.0.53),** never by the reader's device, and "Show link previews" in settings
+  turns them off (`qml/components/LinkPreview.qml`,
+  `server/docs/url-previews.md`). The earlier concern here — every reader's IP
+  disclosed to any linked site — is resolved; policy §8 describes the new
+  behaviour.
 
 ---
 
@@ -343,7 +351,7 @@ people. No analytics, no crash reporting, no ads, no third-party SDKs. Check
 the source.
 ```
 
-### 1.3 Description (4000 max) · **3656 chars**
+### 1.3 Description (4000 max) · **3650 chars**
 
 ```
 BSFChat is chat without the bullshit.
@@ -402,9 +410,10 @@ SAFETY
 
 Block anyone, from their profile card, on any server. They are not told, and
 their messages and invitations stop reaching you everywhere you sign in. Report
-a message or a user to that server's administrators. Delete your account from
-inside the app — read the privacy policy first, because messages you have
-already sent stay in their channels, and we would rather tell you that now.
+a message or a user to that server's administrators. Delete your account, and
+your BSFChat ID, from inside the app — read the privacy policy first, because
+messages you have already sent stay in their channels, and we would rather tell
+you that now.
 
 BEFORE YOU DOWNLOAD — HONEST LIMITS
 
@@ -413,9 +422,9 @@ BEFORE YOU DOWNLOAD — HONEST LIMITS
   from github.com/BSFChat in about five minutes.
 • Screen sharing is not available on iPhone. It works on Mac, Windows, Linux
   and Android.
-• There are no push notifications. BSFChat shows you new messages while it is
-  open, and nothing at all while it is closed. Nothing is handed to Apple's
-  notification servers because there is nothing to hand.
+• Notifications go through Apple's push service, and never carry your
+  messages: by default they say only "New message", and sender and room names
+  appear only if you turn that on.
 • Echo cancellation is new. It uses Apple's own voice processing and it is on by
   default, but if a room gives you trouble, headphones still win.
 • Messages are not end-to-end encrypted. Traffic is protected by TLS and your
@@ -512,18 +521,17 @@ instruction to strip all voice language from the Apple copy no longer applies.
 Self-hosted chat for teams and communities. No ads, no tracking, no telemetry.
 ```
 
-### 2.3 Full description (4000 max) · **2951 chars**
+### 2.3 Full description (4000 max) · **3065 chars**
 
 ```
 BSFChat is chat without the bullshit.
 
-No ads. No analytics. No crash reporting. No advertising ID, no Firebase, no
-Google Play Services dependency, no third-party SDKs of any kind. Not
-"anonymised" analytics — none at all. The source is public, so you can check
-rather than trust.
+No ads. No analytics. No crash reporting. No advertising ID, and no tracking
+SDKs of any kind. Not "anonymised" analytics — none at all. The source is
+public, so you can check rather than trust.
 
-And no servers of ours in the middle. BSFChat is self-hosted: your messages live
-on a server you or your community runs — a rented box, a machine in the office,
+And no servers of ours in the middle of your conversations. BSFChat is
+self-hosted: your messages live on a server you or your community runs — a rented box, a machine in the office,
 a Pi in a cupboard. We do not have a copy, we cannot read your channels, and on
 most servers we do not know they exist.
 
@@ -539,8 +547,9 @@ WHAT YOU GET
 • File attachments and inline images, plus "Share to BSFChat" from other apps
 • Full-text search across your history
 • Multiple servers in one app, each with its own account
-• Background notifications on your own device — no Firebase, nothing sent to
-  Google
+• Push notifications that never carry your messages: "New message" by
+  default, sender and room names only if you turn them on — or keep a
+  background connection instead and nothing goes through Google
 
 ONE ACCOUNT, EVERY SERVER
 
@@ -568,9 +577,10 @@ SAFETY
 
 Block anyone from their profile card, on any server. They are not told, and
 their messages and invitations stop reaching you on every device you sign in on.
-Report a message or a user to that server's administrators. Delete your account
-from inside the app — read the privacy policy first, because messages you have
-already sent stay in their channels, and we would rather say so now.
+Report a message or a user to that server's administrators. Delete your account,
+and your BSFChat ID, from inside the app — read the privacy policy first, because
+messages you have already sent stay in their channels, and we would rather say
+so now.
 
 HONEST LIMITS
 
@@ -616,7 +626,7 @@ enforcement actions.
 | **App activity — other actions** | **Yes** | No | App functionality | Required | Reactions, read positions, block list, notification prefs. Server-stored so they follow the account. |
 | **App info and performance — crash logs** | **No** | No | — | — | **No crash reporter exists.** Grepped `crashlytics/sentry/breakpad/crashpad/bugsnag` across the tree: zero. |
 | **App info and performance — diagnostics** | **No** | No | — | — | No telemetry. `src/voice/video/VideoSendStats.h:44` — every number stays in-process. |
-| **Device or other IDs** | **No** | No | — | — | No IDFA, no Android ID, no `getSerial`, no `identifierForVendor`. The only `QUuid::createUuid()` uses are ephemeral request/transaction IDs. |
+| **Device or other IDs** | **Yes** *(changed 2026-11-19)* | **Yes** | App functionality | Optional | The FCM push token: registered with the user's chat servers and sent through BSFChat's gateway to Google to deliver notifications (policy §5). Optional — the background-connection setting deletes it. Still no IDFA, no Android ID, no `getSerial`, no `identifierForVendor`; the only `QUuid::createUuid()` uses are ephemeral request/transaction IDs. See `PLAY-SUBMISSION.md` §3.3 for the "shared" judgement. |
 | **Location (approximate or precise)** | **No** | No | — | — | No location permission, no geolocation, no IP-to-location. |
 | **Personal info — address, phone, race, politics, sexual orientation, religion** | **No** | No | — | — | No such column exists in either schema. |
 | **Financial info** | **No** | No | — | — | No payment code, no IAP, no billing library. |
@@ -631,10 +641,10 @@ enforcement actions.
 | Question | Answer | Reasoning |
 | --- | --- | --- |
 | Is data encrypted in transit? | **Yes** | TLS to the server; DTLS/SRTP for call media. |
-| Can users request data deletion? | **Yes** | In-app **Delete account**, plus `support@bsfchat.com`. |
+| Can users request data deletion? | **Yes** | In-app **Delete account** (chat server) and **Delete BSFChat ID…** (identity, also on `id.bsfchat.com`), plus `support@bsfchat.com`. |
 | Do you follow the Play Families policy? | **No** (app is not for children) | |
 | Has the app been independently security-reviewed? | **No** | Two internal audits exist (47 findings, `RC-SECURITY-PLAN.md`), but they were not independent. Do not tick this. |
-| Is data shared with third parties? | **No** | No SDK, no ad network, no analytics vendor, no push provider. |
+| Is data shared with third parties? | **Yes — the push token only** | Google (FCM), to deliver notifications. No ad network, no analytics vendor. |
 
 **Do not tick "data is encrypted at rest."** Google does not ask this directly,
 but if any free-text invites the claim, resist it: the server database is
@@ -648,15 +658,13 @@ BSFChat is self-hosted. Messages, attachments and profile details are sent to a
 BSFChat server chosen by the user, which in most cases is operated by the user
 or their own community rather than by us. The developer operates one optional
 public server and one optional sign-in provider; neither is required to use the
-app. The app contains no analytics, no crash reporting, no advertising and no
-third-party SDKs, and sends nothing to the developer about how it is used.
-Voice, video and screen-share streams are transmitted live between participants
-and are never recorded or stored.
+app. The app contains no analytics, no crash reporting and no advertising, and
+sends nothing to the developer about how it is used. Voice, video and
+screen-share streams are transmitted live between participants and are never
+recorded or stored.
 
-When a message contains a link, the app fetches that page from the user's own
-device to show a preview, so the linked site receives the reader's IP address in
-the same way it would if the reader opened the link in a browser. No preview
-data is sent to or stored by the developer.
+(Superseded 2026-11-19 — use the free text in PLAY-SUBMISSION.md §3.6, which
+adds push notifications and server-side link previews.)
 ```
 
 ---
@@ -684,7 +692,7 @@ live media streams honestly, unlike Google's.
 | **User Content › Customer Support** | **Yes** | Yes | No | App Functionality | Report reasons, plus a stored copy of the reported message. |
 | **User Content › Other User Content** | **Yes** | Yes | No | App Functionality | Messages, reactions, threads, pins. |
 | **Identifiers › User ID** | **Yes** | Yes | No | App Functionality | Matrix user ID + server-issued device ID. |
-| **Identifiers › Device ID** | **No** | — | — | — | No IDFA/IDFV/vendor ID is ever read. |
+| **Identifiers › Device ID** | **No** | — | — | — | No IDFA/IDFV/vendor ID is ever read. The APNs device token (since 0.0.49) is sent to the user's chat servers and BSFChat's push gateway to deliver notifications; Apple does not list push tokens as a "Device ID", so no row is needed (`client/docs/ios-release.md` §6). Notification payloads carry room/event ids and, only if the user opts in, sender and room names — never message text. |
 | **Usage Data › Product Interaction, Advertising Data, Other** | **No** | — | — | — | No analytics of any kind. |
 | **Diagnostics › Crash Data, Performance Data, Other** | **No** | — | — | — | No crash reporter, no performance telemetry. |
 | **Purchases** | No | — | — | — | No IAP. |
@@ -696,7 +704,8 @@ live media streams honestly, unlike Google's.
 | **Sensitive Info** | No | — | — | — | |
 
 **"Do you or your third-party partners use data for tracking?" → No.** There are
-no third-party partners. This also means you do **not** need App Tracking
+no third-party partners; Apple's own push service delivers notifications and is
+not one. This also means you do **not** need App Tracking
 Transparency, and `ATTrackingManager` correctly appears nowhere in the tree.
 
 ### 4.2 Microphone and camera: the strings, the prompt, and the background mode
@@ -733,7 +742,7 @@ That day was 2026-09-23. It has been revisited; §4.1 is the result.
 
 ## 5. App review notes
 
-### 5.1 Apple — App Review Information → Notes (4000 max) · **3979 chars**
+### 5.1 Apple — App Review Information → Notes (4000 max) · **3980 chars**
 
 ```
 Thank you for reviewing BSFChat.
@@ -785,7 +794,8 @@ GUIDELINE 5.1.1(v) - ACCOUNT DELETION
 "..." > Your profile > bottom of the list > "Delete account". It lists what is
 deleted; to confirm you type your username and enter your password. (Accounts
 created through our sign-in provider have no chat-server password; the typed
-username alone confirms those.)
+username alone confirms those.) Below it, "Delete BSFChat ID..." deletes the
+sign-in account at id.bsfchat.com.
 
 We disclose rather than hide: deletion destroys the credentials, erases the
 profile and removes the person from every channel, but messages they sent
@@ -809,11 +819,9 @@ WHAT THIS BUILD DOES NOT DO
 
 * No screen sharing on iOS. It exists on the other platforms; the control is
   not shown here and the description says so.
-* No push notifications: no APNs, no PushKit, no notification framework at all.
-  New messages appear while the app is open and nowhere else. The background
-  audio mode is for calls only.
 * No in-app purchases, advertising, analytics, crash reporting or third-party
-  SDKs.
+  SDKs. Push uses APNs via our gateway and never carries message text. The
+  background audio mode is for calls only.
 
 OTHER
 
@@ -858,9 +866,10 @@ ACCOUNT DELETION
 
   In-app at ... > Your profile > Delete account. Confirmation is typing your
   username, plus your password if the account has one (accounts created through
-  our sign-in provider have no chat-server password). Also available by email to
-  support@bsfchat.com. Web route for the Play account-deletion declaration:
-  https://bsfchat.com/support
+  our sign-in provider have no chat-server password). The BSFChat ID is deleted
+  separately: ... > Your profile > "Delete BSFChat ID...", or at
+  id.bsfchat.com. Also available by email to support@bsfchat.com. Web route for
+  the Play account-deletion declaration: https://bsfchat.com/support
 
 FOREGROUND SERVICES — why each one exists
 
@@ -869,20 +878,22 @@ FOREGROUND SERVICES — why each one exists
   • camera (VoiceService, same service): the user can turn their camera on
     inside a voice channel, and the call — video included — must survive
     backgrounding for the same reason.
-  • dataSync (SyncService): maintains the connection to the user's chosen server
-    so messages can raise a local notification while the app is backgrounded.
-    There is no Firebase Cloud Messaging in this app — notifications are
-    generated on the device, and no notification content is sent to Google.
+  • dataSync (SyncService): an opt-in alternative to push. Notifications use
+    Firebase Cloud Messaging by default; with "Keep a background connection
+    instead of push" on (or without Google Play services), SyncService keeps
+    the connection to the user's chosen server open so messages raise a local
+    notification, and nothing goes through Google.
   • mediaProjection (MediaProjectionService): required by the platform for
     screen sharing into a voice channel. Started only after the user accepts
     the system screen-capture consent dialog.
 
 NO ADS, NO ANALYTICS, NO THIRD-PARTY SDKS
 
-  The app contains no advertising, no analytics, no crash reporting, no
-  advertising identifier and no Google Play Services dependency. Android Auto
-  Backup is disabled (allowBackup="false") so that sign-in tokens are never
-  copied to Google Drive.
+  The app contains no advertising, no analytics, no crash reporting and no
+  advertising identifier. The only Google component is Firebase Cloud
+  Messaging, for push; payloads carry no message text. Sign-in tokens are in
+  the Android Keystore, and Android Auto Backup is disabled
+  (allowBackup="false").
 
 Privacy policy: https://bsfchat.com/privacy
 Support: https://bsfchat.com/support
@@ -896,7 +907,7 @@ not only in-app.
 | Field | Answer |
 | --- | --- |
 | Can users request account deletion? | Yes |
-| In-app path | `... menu → Your profile → Delete account` (type the username; password too, for password accounts) |
+| In-app path | `... menu → Your profile → Delete account` (type the username; password too, for password accounts). BSFChat ID: `... menu → Your profile → Delete BSFChat ID…` |
 | Web URL | `https://bsfchat.com/support` |
 | Is any data retained after deletion, and why? | **Superseded — do not paste this row.** It claims "Backups age out within 30 days", which `/privacy` §9 contradicts ("no automatic schedule and no automatic expiry … taken by hand and deleted by hand"), and it omits the fact that deleting a chat-server account does not delete a BSFChat ID (`/privacy` §6). Corrected text: **`PLAY-SUBMISSION.md` §5.8**. |
 
@@ -975,8 +986,12 @@ which has never existed.
       them true on the host, or change the numbers.
 - [ ] Whether to claim echo cancellation in the copy before it has been heard on
       a device (§0.2).
-- [ ] Whether to ship a setting to disable link previews first (§0.8). Not a
-      blocker.
+- [x] ~~Whether to ship a setting to disable link previews first (§0.8).~~
+      Done in 0.0.49: previews come from the server and "Show link previews"
+      turns them off.
+- [ ] Push for review: the APNs key on the gateway (iOS block) and the Push
+      Notifications capability on the App Store profile (§0.8); `[push]` on
+      `uat.bsfchat.com`, the review server, so reviewers get notifications.
 
 **Paperwork**
 
