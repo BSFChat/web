@@ -42,7 +42,7 @@
         <div class="container">
           <h1>Privacy Policy</h1>
           <p class="doc-meta">
-            Last updated 26 September 2026 &middot; applies to the BSFChat apps
+            Last updated 19 November 2026 &middot; applies to the BSFChat apps
             for macOS, Windows, Linux, iPhone and Android, and to the servers we
             run at <code>bsfchat.com</code>
           </p>
@@ -53,10 +53,12 @@
             reporting, no advertising and no tracking of any kind</strong>. Not
             "anonymised" analytics. Not "essential" analytics. None. There is no
             analytics, advertising, attribution or crash-reporting SDK in either
-            mobile app — no Firebase, no Google Play Services, no Crashlytics,
-            no Sentry, no ad network, no install-attribution library. Nothing in
-            the app reports back to us about what you do with it, and there is
-            no server anywhere that we could read such reports from.
+            mobile app — no Firebase Analytics, no Crashlytics, no Sentry, no ad
+            network, no install-attribution library. The one piece of Google in
+            the Android app is Firebase Cloud Messaging, which is there only to
+            deliver push notifications; section 5 says exactly what it carries.
+            Nothing in the app reports back to us about what you do with it, and
+            there is no server anywhere that we could read such reports from.
           </p>
           <p>
             What is left is the data a chat program cannot work without: your
@@ -83,10 +85,15 @@
             We have no central service that your messages pass through. There is
             no BSFChat cloud. We cannot read, copy, index, moderate or delete
             anything on a server we do not operate, and in the ordinary case we
-            do not know that the server exists.
+            do not know that the server exists. The one exception to &ldquo;we
+            never see it&rdquo; is push notifications: if a server's operator
+            lets the official iPhone and Android apps receive them, a short
+            notice that something happened &mdash; never the message itself
+            &mdash; passes through our push gateway on its way to Apple or
+            Google. Section 5 describes exactly what that notice contains.
           </p>
           <p>
-            We <em>do</em> run three things, and only for these are we the data
+            We <em>do</em> run the following, and only for these are we the data
             controller:
           </p>
           <div class="doc-table-wrap">
@@ -108,6 +115,24 @@
                   </td>
                 </tr>
                 <tr>
+                  <td><code>push.bsfchat.com</code></td>
+                  <td>
+                    The push gateway, which hands notifications to Apple and
+                    Google for delivery to the official iPhone and Android apps.
+                    Our chat servers use it, and so does any other server whose
+                    operator allows it. Section 5.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>uat.bsfchat.com</code>, <code>test.bsfchat.com</code></td>
+                  <td>
+                    Two more chat servers running the same software: one for app
+                    store reviewers, one for testing new releases before they
+                    reach <code>chat.bsfchat.com</code>. Everything this policy
+                    says about our chat server applies to them too.
+                  </td>
+                </tr>
+                <tr>
                   <td><code>bsfchat.com</code></td>
                   <td>This website.</td>
                 </tr>
@@ -116,14 +141,14 @@
           </div>
           <p>
             Throughout this policy, <strong>&ldquo;we&rdquo; and
-            &ldquo;our servers&rdquo; mean only those three.</strong> Where a
+            &ldquo;our servers&rdquo; mean only those.</strong> Where a
             section describes the server software generally, it is telling you
             what <em>any</em> BSFChat server does &mdash; so you know what to ask
             the person who runs yours.
           </p>
           <p>
             <strong>Joshua Griffith</strong>, trading as BSFChat, is the
-            controller for those three, and is contactable at
+            controller for those, and is contactable at
             <a href="mailto:support@bsfchat.com">support@bsfchat.com</a>.
             BSFChat is not a registered company &mdash; it is one person
             running this, which is why a name appears here and not an
@@ -133,16 +158,17 @@
           <h2>2. What we do not collect</h2>
           <p>
             Stated plainly, because it is the whole point of the product and
-            because it is checkable &mdash; the source is public and none of
-            these words appear in it except in comments explaining their
-            absence.
+            because it is checkable &mdash; the source is public, and you will
+            not find any of these in it. The only name below that does appear
+            there is Firebase, and only its Cloud Messaging part, for push
+            notifications.
           </p>
           <ul class="doc-nope">
             <li><strong>No analytics or telemetry.</strong> The app never reports feature usage, session length, screen views, button presses or anything else.</li>
             <li><strong>No crash reporting.</strong> There is no crash reporter in the app. If it crashes, we find out because you tell us.</li>
             <li><strong>No advertising and no ad identifiers.</strong> No IDFA, no Android Advertising ID, no ad SDK, no ad network, and no plan to add one.</li>
-            <li><strong>No analytics, advertising, attribution or crash-reporting SDK of any kind.</strong> Not Firebase, not Google Play Services, not Crashlytics, not Sentry, not an ad network, not an install-attribution library. Not one, on either mobile platform. What the apps <em>are</em> built out of is described below the list.</li>
-            <li><strong>No device identifiers.</strong> The app never reads your device's serial, IDFA, Android ID or vendor identifier, and never generates a persistent identifier of its own to track you with.</li>
+            <li><strong>No analytics, advertising, attribution or crash-reporting SDK of any kind.</strong> Not Firebase Analytics, not Crashlytics, not Sentry, not an ad network, not an install-attribution library. Not one, on either mobile platform. The Android app does contain Google's Firebase Cloud Messaging, for push notifications and nothing else. What the apps <em>are</em> built out of is described below the list.</li>
+            <li><strong>No device identifiers.</strong> The app never reads your device's serial, IDFA, Android ID or vendor identifier, and never generates a persistent identifier of its own to track you with. The one identifier of that kind which exists is a <strong>push token</strong>: Apple or Google issue it to the app so that a notification can be addressed to this installation, and it goes to your chat server and our push gateway for that purpose only (section 5). It is removed from your server when you sign out or turn notifications off.</li>
             <li><strong>No location.</strong> No GPS, no location permission, no IP-based geolocation, no mDNS, Bonjour or multicast discovery of any kind. On iPhone you may still see the system's local-network prompt: that is there so the app can reach a chat server running on your own network and so a direct call can use it, not so it can look around. It does not scan for devices or announce itself.</li>
             <li><strong>No contacts, no photo library, no calendar, no microphone-when-idle.</strong> The app has no photo-library permission at all: attachments come from the system file picker.</li>
             <li><strong>No read receipts.</strong> Nobody is told that you read their message, and the app never receives or displays anyone else's read state either — there is no code in it that can. Your own reading position does go to your own server, so that your unread badges agree across your phone and your desktop; it is not shared onwards. Section 4.</li>
@@ -168,9 +194,20 @@
             does a job the app asks it to do; the kind of SDK listed above also
             reports back to the company that wrote it.</strong> Not one of the
             libraries above collects, measures or transmits anything about you.
-            On Android specifically, the packaged app contains no Google Play
-            Services, no Firebase and no AndroidX code &mdash; the only Java
-            inside it is Qt's and ours.
+          </p>
+          <p>
+            <strong>The exception is push, and it is a deliberate one.</strong>
+            The Android app contains Google's Firebase Cloud Messaging library,
+            together with the parts of Google Play services and AndroidX it
+            needs. It does talk to Google &mdash; delivering a notification to a
+            phone that is not running the app is a service Google runs &mdash;
+            and section 5 says exactly what passes through it. Nothing else from
+            Firebase is in the app: no Analytics, no Crashlytics, no Remote
+            Config. Firebase is not contacted until the app asks for a push
+            token, and if you choose the background connection instead (section
+            5), the app stops Firebase and deletes its token. The iPhone app
+            uses Apple's push service, which is part of iOS, and adds no library
+            for it.
           </p>
           <p>
             One thing the apps do that is <em>not</em> tracking but is a network
@@ -198,25 +235,33 @@
           </p>
           <ul>
             <li>Your sign-in tokens, your user ID, device ID, display name and the server addresses you have added.</li>
+            <li>If push notifications are on, the current push token, so that when Apple or Google replace it the app can register the new one and remove the old.</li>
             <li>A local cache of recent messages and rooms, so the app opens instantly instead of re-downloading everything.</li>
             <li>Downloaded and viewed attachments, in the app's own cache folder.</li>
             <li>Your settings: theme, audio devices, per-person volume, notification preferences.</li>
             <li>A rotating local log file for debugging &mdash; the live file plus three older ones, 5&nbsp;MB each. It records what the app is <em>doing</em>: connections, errors, timings. Message text and sign-in tokens are deliberately kept out of it.</li>
           </ul>
           <p>
-            <strong>Being precise about how this is protected:</strong> it is
-            stored in the app's private, OS-sandboxed storage &mdash; on iPhone
-            and Android, in the app container that other apps cannot read. It is
-            <strong>not</strong> in the iOS Keychain or the Android Keystore, and
-            the app does not add encryption of its own on top of the operating
+            <strong>Being precise about how this is protected:</strong> your
+            sign-in tokens &mdash; for each chat server, and for your BSFChat ID
+            &mdash; are kept in the operating system's credential store: the
+            Keychain on iPhone and Mac (not synchronised to iCloud), the Android
+            Keystore on Android, Credential Manager on Windows, and the Secret
+            Service (GNOME Keyring or KWallet) on Linux. On a Linux desktop with
+            no such store, the app keeps them in memory only and you sign in
+            again the next time it starts. Everything else is stored in the
+            app's private, OS-sandboxed storage &mdash; on iPhone and Android,
+            in the app container that other apps cannot read &mdash; and the
+            app does not add encryption of its own on top of the operating
             system's. On Android, automatic Google Drive backup of the app's data
-            is explicitly disabled so your sign-in tokens are never copied to
-            Google's servers.
+            is explicitly disabled, so none of it, sign-in tokens included, is
+            copied to Google's servers.
           </p>
           <p>
             <strong>Signing out</strong> removes the account itself &mdash; the
             server entry, its sign-in tokens, your user ID, device ID and
-            display name. It does <em>not</em> wipe the message cache, the
+            display name &mdash; and removes this device's push registration
+            from that server. It does <em>not</em> wipe the message cache, the
             downloaded attachments or your settings; those stay until the app
             is deleted, and the cache is thrown away automatically if a
             different account signs in on that device.
@@ -265,12 +310,33 @@
                 <tr>
                   <td>Attachments and avatars</td>
                   <td>
-                    The file itself, stored on the server's disk exactly as you
-                    uploaded it, plus its filename, size and type and the fact that
-                    you uploaded it. <strong>Metadata inside the file is not
+                    The file itself, stored exactly as you uploaded it &mdash; on
+                    the server's own disk, or in object storage if its operator
+                    has set that up (ours is object storage with our hosting
+                    provider; section 9) &mdash; plus its filename, size and type
+                    and the fact that you uploaded it. <strong>Metadata inside the file is not
                     stripped</strong> &mdash; if you upload a photo straight from a
                     camera, any GPS coordinates and camera details it contains are
                     preserved and travel with it.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Push registrations</td>
+                  <td>
+                    For each phone signed in with notifications on: its push
+                    token, which app it is, the phone's model name (for example
+                    &ldquo;Google Pixel 8&rdquo;) and its language. Used only to
+                    send notifications, and deleted when that phone signs out or
+                    turns notifications off. Section 5.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Link previews</td>
+                  <td>
+                    For links posted in a channel: the link, and the title,
+                    description and picture the server found there, shared by
+                    everyone on the server and kept for up to two days. Not linked
+                    to who posted or opened it. Section 8.
                   </td>
                 </tr>
                 <tr>
@@ -323,42 +389,79 @@
           <p>
             <strong>Your messages are never sent to another server.</strong> The
             server does not federate: there is no code path by which your
-            messages leave the server you sent them to.
+            messages leave the server you sent them to. A push notification
+            (section 5) carries a notice that a message exists, never the message.
           </p>
 
-          <h2>5. Push notifications</h2>
+          <h2 id="push">5. Push notifications</h2>
           <p>
-            <strong>There are none today.</strong> Neither app has an Apple Push
-            Notification or Firebase Cloud Messaging integration: there is no
-            code in either of them that registers for a push token, so no
-            notification content is ever handed to Apple or Google. What that
-            means in practice is that the iPhone app only shows you new messages
-            while it is open, while Android keeps a background connection to
-            your server and raises notifications locally, on your own device,
-            with no third party involved.
+            The iPhone and Android apps can tell you about new messages while
+            they are not running. On iPhone that goes through
+            <strong>Apple's Push Notification service</strong>; on Android,
+            through <strong>Google's Firebase Cloud Messaging</strong>. For an
+            app that is not running there is no way around them: it is how both
+            platforms deliver notifications. What we can decide is what goes
+            through them, and we keep it to as little as works.
           </p>
           <p>
-            The server software is capable of push, so it is worth being exact
-            rather than claiming more than is true. The configuration we ship
-            has push switched off and names no gateway, and no gateway is
-            deployed. Even if it were switched on, a server only sends a
-            notification to a destination that an app has registered with it
-            &mdash; and no BSFChat app registers one, because there is no code
-            in any of them that could. Nothing is sent.
+            <strong>How a notification travels.</strong> When a message arrives
+            that should notify you &mdash; by default a direct message or a
+            mention, adjustable per channel &mdash; your chat server sends a
+            notice to <code>push.bsfchat.com</code>, our push gateway, which
+            passes it to Apple or Google, who deliver it to your phone. The chat
+            server holds no Apple or Google credentials; only the gateway does.
+            The gateway has no database: it passes each notice on and does not
+            keep it.
           </p>
           <p>
-            <strong>We intend to add push notifications in a future release, and
-            you should hear that from us now rather than on the day it
-            ships.</strong> Getting a message to a phone that is not currently
-            running the app means going through Apple's Push Notification
-            service on iPhone and, most likely, Firebase Cloud Messaging on
-            Android. From that point the content of a notification &mdash;
-            typically who messaged you and the first line of what they said
-            &mdash; passes through Apple's or Google's servers on the way to
-            your phone. That is how push works on both platforms, and there is
-            no version of it that avoids them. When it happens, section 14
-            applies: you will be told in the app before it takes effect, and
-            this section will be rewritten to describe exactly what is sent.
+            <strong>What a notification contains, by default:</strong> which
+            room it is about (an opaque room ID, which includes the server's
+            name), which message, how many unread messages you have, and a
+            priority. <strong>No sender, no room name, and never the text of a
+            message.</strong> Your phone shows &ldquo;New message&rdquo;. On
+            Android, if the app is still running in the background, it then
+            fetches the real message from your own server and shows that
+            instead; that fetch goes straight to your server, not through Apple
+            or Google.
+          </p>
+          <p>
+            <strong>If you turn on &ldquo;Show sender and room names in
+            notifications&rdquo;</strong> in <strong>Client settings &rarr;
+            Notifications</strong>, each
+            notice also carries the sender's user ID and display name, the
+            room's name and the kind of message, so your phone can show who
+            wrote and where. <strong>The message text is not included in either
+            setting.</strong> The setting is off unless you turn it on.
+          </p>
+          <p>
+            <strong>The push token.</strong> To address a notification to your
+            phone, Apple or Google give the app a push token. The app registers
+            it with each chat server you are signed in to, which stores it with
+            the app's ID, your phone's model name and its language (section 4).
+            The token travels to our gateway with every notice, and Apple or
+            Google, who issued it, see it when they deliver. It is removed from
+            your server when you sign out or turn notifications off, and on
+            Android when you choose the background connection.
+          </p>
+          <p>
+            <strong>Android without Google.</strong> &ldquo;Keep a background
+            connection instead of push&rdquo;, in the same settings,
+            switches Firebase off, deletes the token, and goes back to keeping
+            the app's own connection open to your server, which raises
+            notifications on your device with no third party involved. It uses
+            more battery and shows an ongoing notification while it runs. A
+            phone without Google Play services uses it automatically.
+          </p>
+          <p>
+            <strong>Servers we do not run.</strong> A chat server sends notices
+            to our gateway only if its operator allows it. The setup we publish
+            for running your own server allows it by default, so that the
+            official apps work, and the operator can turn it off. Where it is
+            allowed, that server's notices pass through
+            <code>push.bsfchat.com</code> in exactly the form described above;
+            that is the only thing from a server we do not run that reaches
+            anything of ours. Where it is not, the app can only notify you while
+            it is open, or on Android through the background connection.
           </p>
 
           <h2 id="identity">6. The BSFChat ID sign-in service</h2>
@@ -412,12 +515,21 @@
             range.
           </p>
           <p>
-            <strong>Deleting a BSFChat ID.</strong> The &ldquo;Delete
-            account&rdquo; button in the app deletes your account on the
-            <em>chat server</em>. It does not yet delete your BSFChat ID; there
-            is no button for that. Email
-            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a> and we
-            will remove it by hand.
+            <strong>Deleting a BSFChat ID.</strong> Your BSFChat ID is a separate
+            account from your account on any chat server, and it is deleted
+            separately. In the app, <strong>Delete BSFChat ID&hellip;</strong>
+            in your settings, just below Delete account, explains what it
+            removes and then opens your
+            account page at <code>id.bsfchat.com</code>, where you confirm with
+            your username and password (and a two-factor code, if you use one);
+            you can also sign in at <code>id.bsfchat.com</code> and use
+            <strong>Delete Account</strong> there directly. It removes your
+            email address, password, two-factor settings, display name, avatar
+            and the list of servers you have signed in to, and ends every
+            session and app sign-in. Your username stays reserved, so that
+            nobody else can take it and appear to be you in old conversations.
+            It does not touch any chat server: your accounts and messages there
+            stay until you delete them on each server (section 10).
           </p>
 
           <h2 id="voice">7. Voice and video calls</h2>
@@ -460,7 +572,7 @@
             does see both ends' IP addresses, how much data flowed and for how
             long, and the credential it was given, which contains your user ID.
             Relay credentials are issued by your chat server, are unique to you,
-            and expire after an hour.
+            and expire after a day.
           </p>
           <p>
             <strong>Call media is encrypted between participants</strong> using
@@ -503,22 +615,22 @@
           </p>
           <h3>Link previews</h3>
           <p>
-            When somebody posts a link in a channel, <strong>your device fetches
-            that page directly</strong> to show a preview &mdash; the request
-            comes from you, not from the server. The site being linked therefore
-            sees your IP address and that someone opened its page. For a YouTube
-            link this is two requests to Google: one to YouTube for the title,
-            one to its image server for the thumbnail. This applies to any link
-            anyone posts, so treat a link from someone you do not trust with the
-            same caution you would in a browser.
+            When somebody posts a link in a channel, <strong>the chat server
+            fetches that page, not your device</strong>, and your app shows the
+            title, description and picture the server found. The linked site
+            sees the server's address and a request labelled as a BSFChat
+            preview &mdash; not your IP address, and nothing about who is
+            reading. The server sends no cookies or sign-in details with the
+            request, and refuses links that point into private networks.
           </p>
           <p>
-            <strong>There is no setting to turn this off yet, and there should
-            be.</strong> Previews are fetched for up to two links per message as
-            the message comes into view. This is the largest way in which simply
-            reading a channel discloses something about you to somebody outside
-            it, and it is the one part of this policy describing a thing we
-            intend to change rather than to defend.
+            The result is shared by everyone on that server and kept for up to
+            two days; the picture is stored with the server's other files for
+            that long. Your app asks for previews of up to two links per message
+            as the message comes into view, and turning off <strong>Show link
+            previews</strong> in settings stops it asking at all. A server that
+            does not offer previews simply shows none: the app never falls back
+            to fetching the page itself.
           </p>
 
           <h2 id="security">9. How it is protected, honestly</h2>
@@ -537,10 +649,12 @@
             <strong>Everything else on a chat server is stored unencrypted, and
             you should know that.</strong> The database holds every message in
             plain text, plus a second copy of each message in the search index.
-            Uploaded files sit on disk as files. There is no database passphrase.
-            Anyone who can read the server's disk &mdash; its administrator, a
-            support engineer at its hosting provider, anyone who steals a backup
-            &mdash; can read everything on it. This is true of most chat servers;
+            Uploaded files are stored as ordinary files &mdash; on our
+            deployment, in object storage with our hosting provider. There is no
+            database passphrase. Anyone who can read the server's disk or its
+            file storage &mdash; its administrator, a support engineer at its
+            hosting provider, anyone who steals a backup &mdash; can read
+            everything on it. This is true of most chat servers;
             it is simply not usually written down. On our own deployment the
             countermeasures are ordinary ones: the database is owner-readable
             only, deleted rows are overwritten rather than merely unlinked, and
@@ -617,7 +731,7 @@
           </p>
           <p><strong>What it does:</strong></p>
           <ul>
-            <li>Destroys your password and every sign-in token, everywhere. You are signed out on every device and cannot sign in again.</li>
+            <li>Destroys your password and every sign-in token, everywhere, along with every push registration. You are signed out on every device and cannot sign in again.</li>
             <li>Erases your display name, nickname and avatar from your account.</li>
             <li>Removes you from every channel and direct message.</li>
             <li>Deletes your block list, your notification settings and your reading positions.</li>
@@ -737,7 +851,7 @@
             legitimate interest in keeping it secure and free of abuse.
           </p>
 
-          <h2>13. This website, and the two companies in the path</h2>
+          <h2>13. This website, and the companies in the path</h2>
           <p>
             <code>bsfchat.com</code> sets no cookies, runs no analytics, and
             shows no consent banner because it has nothing to ask you about.
@@ -758,8 +872,8 @@
           </p>
           <p>
             <strong>Cloudflare.</strong> <code>bsfchat.com</code>,
-            <code>chat.bsfchat.com</code> and <code>id.bsfchat.com</code> all sit
-            behind Cloudflare, so every request you make to any of them reaches
+            <code>chat.bsfchat.com</code>, <code>id.bsfchat.com</code> and our
+            other servers listed in section 1 all sit behind Cloudflare, so every request you make to any of them reaches
             Cloudflare before it reaches us. Cloudflare sees your IP address, the
             address you asked for and your app's or browser's user-agent string,
             and because it terminates the HTTPS connection it is technically
@@ -785,12 +899,21 @@
             want read.
           </p>
           <p>
-            Cloudflare and Proton are the two companies that sit in the path of
-            something you do with us. There is a third that does not: the
-            hosting company whose machine our servers run on, which is why
-            section 9 says plainly that its staff could read the disk. And
-            there is GitHub, which sees you only when you click a download link
-            or when the desktop app checks for an update.
+            <strong>Apple and Google</strong> deliver push notifications to the
+            official iPhone and Android apps (section 5). They see what a
+            notification contains &mdash; by default no names and never message
+            text &mdash; and the push token it is addressed to. Both are US
+            companies, so that data leaves the UK and the EEA. On Android you can
+            avoid Google entirely with the background connection.
+          </p>
+          <p>
+            Cloudflare, Proton, and Apple and Google for notifications, are the
+            companies that sit in the path of something you do with us. There is
+            another that does not: the hosting company whose machine our servers
+            run on, and whose object storage holds the files uploaded to our chat
+            servers, which is why section 9 says plainly that its staff could
+            read them. And there is GitHub, which sees you only when you click a
+            download link or when the desktop app checks for an update.
           </p>
 
           <h2>14. Changes to this policy</h2>
@@ -801,14 +924,23 @@
             before it takes effect, not quietly in a footer.
           </p>
           <p>
-            Two such changes are already planned, and they are written into this
-            document now rather than left for you to find out about later: push
-            notifications, which would put notification content in front of
-            Apple and Google (section 5), and email, which would involve an
-            email provider and give us an address we do not have today (section
-            6). Both are exactly the kind of change the paragraph above is
-            about, and both will get that in-app notice before they take
-            effect.
+            <strong>What changed on 19 November 2026:</strong> push
+            notifications arrived, so section 5 now describes what they send
+            through our gateway and through Apple and Google, and section 13
+            names them; link previews are now fetched by the chat server rather
+            than your device (section 8); sign-in tokens moved into your
+            system's credential store (section 3); a BSFChat ID can now be
+            deleted from the app or at <code>id.bsfchat.com</code> (section 6);
+            and files on our chat servers are now kept in object storage with
+            our hosting provider (sections 4 and 9).
+          </p>
+          <p>
+            One planned change is still to come, and it is written into this
+            document now rather than left for you to find out about later:
+            email, which would involve an email provider and give us an address
+            we do not have today (section 6). It is exactly the kind of change
+            the paragraph above is about, and it will get that in-app notice
+            before it takes effect.
           </p>
 
           <h2>15. Contact</h2>

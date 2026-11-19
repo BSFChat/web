@@ -41,7 +41,7 @@
       <section class="doc">
         <div class="container">
           <h1>Support</h1>
-          <p class="doc-meta">Last updated 26 September 2026</p>
+          <p class="doc-meta">Last updated 19 November 2026</p>
 
           <p>
             BSFChat is a small project. There is no support desk and no ticket
@@ -189,12 +189,17 @@
             is deliberate, and the privacy policy explains why.
           </p>
           <p>
-            One gap to know about: if you signed in with a BSFChat ID from
-            <code>id.bsfchat.com</code>, deleting your account on a chat server
-            does <em>not</em> delete that identity account &mdash; there is no
-            button for it yet. Email
-            <a href="mailto:support@bsfchat.com">support@bsfchat.com</a> and ask
-            us to remove it, and we will.
+            If you signed in with a BSFChat ID from <code>id.bsfchat.com</code>,
+            that is a separate account, and deleting your account on a chat
+            server does <em>not</em> delete it. Just below
+            <strong>Delete account</strong> is <strong>Delete BSFChat
+            ID&hellip;</strong>: it explains what will be removed, then opens
+            your account page at <code>id.bsfchat.com</code>, where you confirm.
+            You can also sign in there and use <strong>Delete Account</strong>
+            directly.
+            <a href="/privacy/#identity">The privacy policy</a> lists what it
+            removes. Delete your chat-server accounts first if you want those
+            gone too: deleting the BSFChat ID does not touch them.
           </p>
 
           <h2>Common problems</h2>
@@ -218,10 +223,24 @@
             &mdash; iOS has no equivalent of the desktop screen picker, and the
             button is not shown there.
           </p>
-          <h3>"I am not getting notifications on my iPhone"</h3>
+          <h3>"I am not getting notifications on my phone"</h3>
           <p>
-            You will not. The iOS app has no push notifications yet — it only
-            shows you new messages while it is open. This is on the roadmap.
+            Check that notifications are on in BSFChat
+            (<strong>Client settings &rarr; Notifications</strong>, in the
+            <strong>&hellip;</strong> menu on a phone) and that your phone
+            allows them for BSFChat. The same page has a
+            <strong>Push status</strong> line that says whether push is working,
+            and if not, why.
+          </p>
+          <p>
+            Push has to be allowed by the server. A server run by somebody
+            other than us may not allow our push gateway, and then the app can
+            only notify you while it is open; the status line in the
+            notification settings says so. On Android you can turn on
+            <strong>Keep a background connection instead of push</strong> in the
+            same place, which works with any server and needs no Google services,
+            at the cost of some battery. What a push notification contains is
+            described in <a href="/privacy/#push">the privacy policy</a>.
           </p>
           <h3>"Echo / people hear themselves"</h3>
           <p>
@@ -244,7 +263,7 @@
             and the deployment notes are in
             <a href="https://github.com/BSFChat/deploy" rel="noopener">github.com/BSFChat/deploy</a>
             &mdash; clone it, <code>cp .env.example .env</code>, fill in your
-            domains, run <code>./setup.sh</code>, then
+            domains, run <code>sudo ./setup.sh</code>, then
             <code>docker compose up -d</code>.
             Self-hosting questions are best asked as a GitHub issue rather than
             by email, so the answer helps the next person too.
