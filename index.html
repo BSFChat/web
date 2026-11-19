@@ -15,7 +15,12 @@
     <meta property="og:title" content="BSFChat — Self-hosted chat, no tracking, no lock-in" />
     <meta property="og:description" content="BSFChat is a self-hosted Discord/Teamspeak-style chat app. Own your server, your identity, your data. No tracking, no upselling, no vendor lock-in." />
     <meta property="og:url" content="https://bsfchat.com/" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="https://bsfchat.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="BSFChat: self-hosted chat you actually own." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://bsfchat.com/og-image.png" />
     <meta name="twitter:title" content="BSFChat — Self-hosted chat, no tracking, no lock-in" />
     <meta name="twitter:description" content="BSFChat is a self-hosted Discord/Teamspeak-style chat app. Own your server, your identity, your data. No tracking, no upselling, no vendor lock-in." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -75,8 +80,8 @@
               <h3>One identity, every server</h3>
               <p>
                 Sign in once at <code>id.bsfchat.com</code> and use the same
-                account on every BSFChat server you join. Run your own OIDC
-                provider too if you want — it's standard.
+                account on every BSFChat server you join. Or run your own
+                BSFChat ID provider &mdash; it's standard OpenID Connect.
               </p>
             </article>
             <article class="tile">
@@ -94,7 +99,9 @@
         <div class="container">
           <h2>Download the client</h2>
           <p class="section-lede">
-            Prebuilt for macOS, Windows, and Linux. Signed releases on GitHub.
+            Prebuilt for macOS, Windows, and Linux, released on GitHub. From
+            0.0.49 on, every release carries a signed checksum file, which the
+            in-app updater checks before it installs anything.
           </p>
           <div class="tiles">
             <a
@@ -159,7 +166,7 @@
 cd /opt/bsfchat
 cp .env.example .env
 $EDITOR .env        # CHAT_HOST, ID_HOST, TURN_HOST, TURN_EXTERNAL_IP
-./setup.sh          # renders config/*.toml and nginx/bsfchat.conf
+sudo ./setup.sh     # renders config/*.toml and nginx/bsfchat.conf
 docker compose up -d</code></pre>
           <p>
             Both HTTP services bind to loopback, so put a reverse proxy in
@@ -173,9 +180,13 @@ docker compose up -d</code></pre>
           <p>
             Identity is federated on purpose: one account can work across
             every BSFChat server, so your users don't need a new login per
-            server. The deploy stack runs its own provider at your
-            <code>ID_HOST</code>; any OIDC-compliant provider works, including
-            the shared one at <code>id.bsfchat.com</code>.
+            server. The deploy stack runs its own BSFChat ID provider at your
+            <code>ID_HOST</code>, or you can point your server at the shared
+            one at <code>id.bsfchat.com</code>. Another OpenID Connect provider
+            can work, but only one that supports resource indicators
+            (RFC&nbsp;8707), with BSFChat's app clients registered on it and the
+            server's <code>client_ids</code> allowlist set to match. Plain
+            username-and-password accounts need no provider at all.
           </p>
         </div>
       </section>

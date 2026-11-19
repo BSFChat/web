@@ -88,3 +88,12 @@ served as `application/json` without redirects. The nginx example has a
 `default_type application/json` for exactly this; it only takes effect once
 that config is applied on the host. Check with the `curl` lines at the top of
 the example.
+
+## Social preview image
+
+`og-image.png` (1200×630) is the card link previews show for the home page
+(`og:image` / `twitter:image` in `index.html`). Its source is `og-image.svg`.
+After editing the SVG, re-export the PNG at exactly 1200×630, e.g. by opening
+it in a browser with the Geist font from `fonts/` available and taking a
+1200×630 screenshot (the committed PNG was made that way, with headless
+Chromium). Crawlers do not read SVG, so the PNG is the one that matters.
