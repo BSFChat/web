@@ -31,6 +31,32 @@ Prepared 2026-09-29 against:
 | Privacy policy | <https://bsfchat.com/privacy/> — fetched and read in full, 2026-09-29 | source of truth for §3 below |
 | Terms | <https://bsfchat.com/terms/> — fetched and read in full | |
 
+> [!IMPORTANT]
+> **Update 2026-11-19: the app changed under this document.** From 0.0.49 the
+> client has push notifications (Firebase Cloud Messaging on Android, through
+> BSFChat's gateway `push.bsfchat.com`), server-side link previews, sign-in
+> tokens in the Android Keystore / iOS Keychain, and an in-app route to delete a
+> BSFChat ID. The privacy policy was rewritten the same day (dated 19 November
+> 2026). The answers below that this touches have been updated in place: §3.1
+> (deletion), §3.2–§3.6 (Device or other IDs, previews, free text), §5.5, §5.6
+> (`dataSync`), §5.8, §8.2 and §8.5. Everything else is as checked on
+> 2026-09-29. Two consequences for the upload itself:
+>
+> - **Upload a 0.0.49 (or later) bundle, not `v0.0.48-rc.8`.** Production
+>   identity no longer accepts the `bsfchat://` redirect that builds before
+>   0.0.49 use (audit 3, fix-first #1), so rc.8 cannot sign in with a BSFChat
+>   ID, and its behaviour no longer matches the policy or the answers here.
+>   The table below describes the old rc.8 artifact; re-run §2.2 on the new
+>   one.
+> - **Re-check the merged manifest of that bundle** (`aapt2 dump permissions`
+>   or `bundletool dump manifest`): `firebase-messaging` merges in Google's
+>   own permissions and components (at least
+>   `com.google.android.c2dm.permission.RECEIVE`), so the permission list in
+>   §5.7 and the "no `AD_ID`" claim in §3.2 and §5.5 must be confirmed against
+>   the new bundle, not assumed. If `AD_ID` appears, add
+>   `<uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>`
+>   to the client manifest rather than changing the answers.
+
 > **Read §7 first if you read nothing else.** It lists the four places where the
 > answers that were already drafted contradict the live policy or the code, and
 > one place where the *brief* for this document was wrong about the policy.
@@ -201,7 +227,7 @@ Asked in this order.
 | --- | --- | --- | --- |
 | 1 | Does your app collect or share any of the required user data types? | **Yes** | Messages, attachments, display name and a user ID all leave the device for a chat server. Policy §4 enumerates exactly what the server stores. |
 | 2 | Is all of the user data collected by your app encrypted in transit? | **Yes** — *but read §7.3 before you tick it* | Policy §4: *"Traffic between the app and the server is protected by TLS, and on our deployment the connection is HTTPS throughout."* `src/net/ServerDiscovery.cpp:32` prepends `https://` to anything typed without a scheme. The caveat in §7.3 is a user-typed `http://` LAN server. |
-| 3 | Do you provide a way for users to request that their data be deleted? | **Yes** | Policy §10: *"There is a Delete account button in the app, in your settings below Log out."* Implemented client-side in `client/src/net/DeactivateFlow.h` + `client/qml/components/DeleteAccountDialog.qml`; server route `POST /_matrix/client/v3/account/deactivate` is live on production (probed 2026-09-29: returns 401 auth-required, not 404). Plus `support@bsfchat.com` for anything beyond that scope, per policy §10 and §12. |
+| 3 | Do you provide a way for users to request that their data be deleted? | **Yes** | Policy §10: *"There is a Delete account button in the app, in your settings below Log out."* Implemented client-side in `client/src/net/DeactivateFlow.h` + `client/qml/components/DeleteAccountDialog.qml`; server route `POST /_matrix/client/v3/account/deactivate` is live on production (probed 2026-09-29: returns 401 auth-required, not 404). The BSFChat ID is deleted separately: **Delete BSFChat ID…** just below it opens `id.bsfchat.com/profile.html#delete` (policy §6). Plus `support@bsfchat.com` for anything beyond that scope, per policy §10 and §12. |
 | 4 | *(optional)* Your app has been independently validated against a global security standard (MASA) | **No** | Two internal audits exist (`RC-SECURITY-PLAN.md`, 47 findings) and neither was independent. Ticking this without a MASA assessment is a false declaration. |
 
 There is no Data Safety question about **encryption at rest**, and nothing you
@@ -238,20 +264,30 @@ labels them.
 - [x] **Other actions**
 - [ ] App interactions, In-app search history, Installed apps, Other user-generated content
 
+**Device or other IDs**
+- [x] **Device or other IDs** — *changed 2026-11-19, see below*
+
 **Everything else — leave entirely unticked:** Location (both), Financial info
 (all), Health and fitness (both), Calendar, Contacts, Web browsing history, App
-info and performance (crash logs, diagnostics, other), Device or other IDs.
+info and performance (crash logs, diagnostics, other).
 
 Two of those deserve a sentence each because they look like they should be
-ticked:
+ticked (or, for the first, used not to be):
 
-- **Device or other IDs — No.** The device ID BSFChat stores is *issued by the
-  chat server per sign-in* (policy §4: *"Not a hardware identifier: it
-  identifies a session, not your phone"*). It belongs under **User IDs**, which
-  is ticked. No IDFA, no Android Advertising ID, no `getSerial`, no MAC —
-  grepped across `client/src`, `client/android`, `client/qml`: zero hits for any
-  analytics, attribution, crash or ad SDK. Manifest declares no
-  `com.google.android.gms.permission.AD_ID`.
+- **Device or other IDs — Yes, for the push token only.** With push on, the app
+  gets an FCM registration token from Google and sends it to each chat server
+  the user is signed in to (as the pusher `pushkey`, with the phone's model
+  name), and from there it goes to BSFChat's push gateway and back to Google
+  with every notification (policy §5, `client/docs/push-notifications.md`).
+  That is an identifier for this app install, which is what this category is
+  for. The *device ID* BSFChat also stores is still not one: it is *issued by
+  the chat server per sign-in* (policy §4: *"Not a hardware identifier: it
+  identifies a session, not your phone"*) and stays under **User IDs**. No
+  IDFA, no Android Advertising ID, no `getSerial`, no MAC — grepped across
+  `client/src`, `client/android`, `client/qml`: zero hits for any analytics,
+  attribution, crash or ad SDK. The source manifest declares no
+  `com.google.android.gms.permission.AD_ID` (re-check the merged manifest; see
+  the update note at the top).
 - **In-app search history — No.** Search runs as a request against the user's
   own server; nothing stores the query. `server/src/api/SearchHandler.cpp` reads
   the FTS index and writes nothing; no `searchHistory`/`recentSearch` anywhere
@@ -262,12 +298,25 @@ ticked:
 For each ticked type the Console asks four things: **Collected / Shared**,
 **Processed ephemerally?**, **Required or optional?**, and **Purposes**.
 
-**Shared is No for every single type.** Google's definition of sharing is
-*transfer to a third party*, and it explicitly excludes transfers the user
-initiates and reasonably expects. Sending a message to a channel is exactly
-that. There is no SDK, no ad network, no analytics vendor and no push provider
-in the app — policy §2 and §5, and the manifest confirms it (no Play Services,
-no Firebase).
+**Shared is No for every type except Device or other IDs.** Google's
+definition of sharing is *transfer to a third party*, and it explicitly
+excludes transfers the user initiates and reasonably expects. Sending a message
+to a channel is exactly that. There is no ad network and no analytics vendor in
+the app. The one third party is the push path (policy §5): the push token goes
+to Google (FCM) and through BSFChat's gateway with every notification, so it is
+answered as shared. Notification payloads carry a room id, an event id and an
+unread count by default — none of which is a Data Safety data type — and never
+message text.
+
+> **[owner: decide]** Google exempts transfers to a *service provider* that
+> processes data on your behalf from "sharing", and FCM arguably is one. The
+> table answers **Shared: Yes** for the push token anyway, because over-declaring
+> costs nothing on the label and under-declaring is a policy violation. The same
+> question applies to the opt-in "Show sender and room names" tier, which sends
+> the *sender's* display name and the room name to Google; it is not declared
+> as sharing **Name** here because that data is another user's, collected from
+> their device, and is never the device owner's own. Decide both before
+> submitting.
 
 | Data type | Collected | Shared | Ephemeral | Required / Optional | Purposes | Justification |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -280,6 +329,7 @@ no Firebase).
 | **Voice or sound recordings** | Yes | No | **Yes** | **Optional** | App functionality | Live voice only. Policy §7 describes the stream; nothing in `client/src/voice/` writes audio to disk or to the server. The stream leaves the device, so it is *collected*; it is not retained, so it is *ephemeral*. |
 | **Files and docs** | Yes | No | No | **Optional** | App functionality | Any MIME type through the system file picker plus the `ACTION_SEND` share target (manifest `intent-filter`). Retained on the server indefinitely — policy §10 *"Messages and attachments: indefinitely"*. |
 | **Other actions** | Yes | No | No | **Required** | App functionality | Reactions, reading position, block list, notification preferences. Policy §4 lists all four as server-stored so they follow the account. |
+| **Device or other IDs** | Yes | **Yes** | No | **Optional** | App functionality | The FCM push token, registered with the user's chat servers and sent to BSFChat's gateway and Google to deliver notifications (policy §5). Optional: "Keep a background connection instead of push" deletes it and stops Firebase, and a phone without Play services never gets one. |
 
 > **On "Videos" and ephemerality.** The Console applies one ephemeral flag per
 > data type, and BSFChat's video is two different things: a live stream that is
@@ -310,31 +360,40 @@ and nowhere else. Do not invent a category for them.
 | Disclosure | Where it is in the policy |
 | --- | --- |
 | Peer-to-peer calls expose each participant's IP to the others, mitigated by the "Hide my IP address" setting | §7 |
-| Link previews fetch third-party pages **from the reader's device**, disclosing the reader's IP to any site a sender links | §8 |
+| Link previews are fetched **by the chat server**, not the reader's device (since 0.0.49 / server 0.0.53); the linked site sees the server, and the preview is cached on the server for up to two days | §8 |
 | nginx on `chat.bsfchat.com` / `id.bsfchat.com` writes an access log containing IP addresses | §9 |
 
 ### 3.5 Things that will change this form later
 
-Two are already written into the policy as planned (§14), and both would require
-the Data Safety form to be edited **before** the release that ships them:
+One is still written into the policy as planned (§14), and it would require
+the Data Safety form to be edited **before** the release that ships it:
 
-- **Push notifications** (§5) — would add Apple and Google as recipients of
-  notification content. That is a *shared with third parties* change.
 - **Verified email and password reset** (§6) — would move Email address from
   optional-and-inert to a delivery path through a mail provider.
 
+Push notifications, the other planned change this section used to list, have
+shipped; the form above already includes them (Device or other IDs).
+
 ### 3.6 Free text — paste into the Data Safety "additional details" box
 
-Verified against the policy line by line. The link-preview paragraph matches
-policy §8; the "never recorded" clause matches §7.
+Verified against the policy (19 November 2026) line by line. The link-preview
+paragraph matches policy §8, the push paragraph §5, and the "never recorded"
+clause §7.
 
 ```
 BSFChat is self-hosted. Messages, attachments and profile details are sent to a
 BSFChat server chosen by the user, which in most cases is operated by the user
 or their own community rather than by us. The developer operates one optional
 public server and one optional sign-in provider; neither is required to use the
-app. The app contains no analytics, no crash reporting, no advertising and no
-third-party SDKs, and sends nothing to the developer about how it is used.
+app. The app contains no analytics, no crash reporting and no advertising, and
+sends nothing to the developer about how it is used.
+
+Push notifications use Firebase Cloud Messaging. The app registers its FCM token
+with the user's chat server, which sends notifications through the developer's
+push gateway to Google. By default a notification contains only a room id, an
+event id and an unread count; the sender's and room's names are added only if
+the user turns that on, and message text is never included. Users can instead
+choose a background connection that does not use Google at all.
 Voice, video and screen-share streams are transmitted live between participants
 and are never recorded or stored.
 
@@ -342,10 +401,10 @@ Voice and video calls connect directly between participants where the network
 allows, which means participants' devices see each other's IP addresses. A
 "Hide my IP address" setting forces every call through a relay instead.
 
-When a message contains a link, the app fetches that page from the user's own
-device to show a preview, so the linked site receives the reader's IP address in
-the same way it would if the reader opened the link in a browser. No preview
-data is sent to or stored by the developer.
+When a message contains a link, the chat server fetches the page to show a
+preview, so the linked site sees the server rather than the reader. The preview
+is cached on that server for up to two days and can be turned off in the app's
+settings.
 
 Messages are not end-to-end encrypted, and data on a chat server is not
 encrypted at rest. The privacy policy states both plainly.
@@ -467,10 +526,11 @@ there is no advertising and no plan for any.
 
 ### 5.5 Advertising ID
 
-**Does your app use an advertising ID?** → **No.** The manifest declares no
-`com.google.android.gms.permission.AD_ID` and the packaged app contains no Play
-Services (policy §2: *"the packaged app contains no Google Play Services, no
-Firebase and no AndroidX code"*).
+**Does your app use an advertising ID?** → **No.** The source manifest declares
+no `com.google.android.gms.permission.AD_ID`. Since 0.0.49 the app does contain
+Firebase Cloud Messaging and the Play services client code it needs (policy §2),
+but no Analytics or ads library; confirm the merged manifest of the bundle you
+upload has no `AD_ID` (see the update note at the top).
 
 ### 5.6 Foreground service permissions — **four** declarations
 
@@ -508,20 +568,23 @@ and is turned on only by an explicit user action.
 
 **dataSync**
 ```
-SyncService maintains the connection to the chat server the user has chosen, so
-that an incoming message can raise a notification while the app is backgrounded.
+BSFChat uses Firebase Cloud Messaging for notifications by default. SyncService
+is the alternative for users who cannot or choose not to use it: it maintains
+the connection to the chat server the user has chosen, so that an incoming
+message can raise a notification while the app is backgrounded.
 
-BSFChat deliberately does not use Firebase Cloud Messaging. The app is a client
-for self-hosted servers: routing every user's notification traffic through
-Google would mean the content of private messages passing through a third party
-that the user did not choose, which contradicts the product's core promise and
-its published privacy policy. There is no FCM, no Firebase and no Google Play
-Services dependency anywhere in the app. Notifications are generated locally on
-the device from data the app already holds, and nothing about them is sent to
-any third party.
+It runs only in two cases: when the user turns on "Keep a background connection
+instead of push" in the notification settings (which stops Firebase and deletes
+the FCM token, so no notification data passes through Google), or automatically
+when the device has no Google Play services and FCM cannot be used. BSFChat is a
+client for self-hosted servers, and some of their users do not want
+notification metadata passing through a third party; this setting is how the
+app respects that. Notifications in this mode are generated locally on the
+device from data the app already holds.
 
-The service runs only while the user is signed in to at least one server and
-stops when they sign out.
+The service runs only while the user is signed in to at least one server, shows
+an ongoing notification while it runs, and stops when they sign out or switch
+back to push.
 ```
 
 **mediaProjection**
@@ -535,7 +598,9 @@ as soon as screen sharing stops.
 
 > `dataSync` is the one Google pushes back on hardest; their stated position is
 > that it is not for indefinite background work and that apps should use FCM.
-> The argument above is the honest one and it is the one your own policy makes.
+> Since 0.0.49 the app does use FCM by default, which makes this a much easier
+> case: the service is an opt-in fallback. The demo video should show turning
+> the setting on and a message then arriving as a notification.
 > If it is rejected, the fallback documented in `client/docs/android-release.md`
 > §4 is to sync only while the app is foreground or recently used — a code
 > change, not a paperwork one.
@@ -560,7 +625,7 @@ Play asks for this separately from Data Safety, and it wants a route reachable
 | Field | Answer |
 | --- | --- |
 | Can users request that their account and data be deleted? | **Yes** |
-| In-app route | `… menu → Your profile → Delete account`. Confirmation is typing your username, plus your password if the account has one — accounts created through the BSFChat ID sign-in provider have no chat-server password and are deleted on the bearer token alone (`client/src/net/DeactivateFlow.h`). |
+| In-app route | `… menu → Your profile → Delete account`. Confirmation is typing your username, plus your password if the account has one — accounts created through the BSFChat ID sign-in provider have no chat-server password and are deleted on the bearer token alone (`client/src/net/DeactivateFlow.h`). The BSFChat ID itself: `… menu → Your profile → Delete BSFChat ID…`, which opens `https://id.bsfchat.com/profile.html#delete`. |
 | Web URL | `https://bsfchat.com/support` |
 | Does deletion remove all data? | **No — some data is retained.** Use the text below. |
 
@@ -571,8 +636,8 @@ claims backups age out within thirty days, which the live policy contradicts
 ```
 Deleting an account destroys the password and every sign-in token, erases the
 display name, nickname and avatar, removes the account from every channel and
-direct message, and deletes the block list, notification settings and reading
-positions.
+direct message, and deletes the block list, notification settings, reading
+positions and every push registration (push token).
 
 Some data is deliberately retained, and the privacy policy says so before the
 user presses the button:
@@ -592,8 +657,10 @@ user presses the button:
     currently taken and removed by hand, with no automatic expiry schedule, so
     no fixed retention period is claimed.
   - Deleting a chat-server account does not delete a BSFChat ID at
-    id.bsfchat.com. There is no in-app button for that yet; it is removed by
-    hand on request to support@bsfchat.com.
+    id.bsfchat.com. That is a separate account with its own deletion, in the
+    app ("Delete BSFChat ID...") or at https://id.bsfchat.com. It removes the
+    email address, password, two-factor settings, profile and server list and
+    ends every session; the username stays reserved.
 
 Full detail: https://bsfchat.com/privacy#deletion (and section 6 of the same
 page for the BSFChat ID).
@@ -745,10 +812,12 @@ It is implemented (`client/src/net/DeactivateFlow.h`,
 (§7.1). By-hand deletion is the *secondary* route, and it covers two specific
 things:
 
-- **The BSFChat ID at `id.bsfchat.com`.** Policy §6: *"The 'Delete account'
-  button in the app deletes your account on the chat server. It does not yet
-  delete your BSFChat ID; there is no button for that. Email
-  support@bsfchat.com and we will remove it by hand."*
+- **The BSFChat ID at `id.bsfchat.com`.** Policy §6, as of 2026-09-29: *"The
+  'Delete account' button in the app deletes your account on the chat server.
+  It does not yet delete your BSFChat ID; there is no button for that. Email
+  support@bsfchat.com and we will remove it by hand."* *(Superseded
+  2026-11-19: the BSFChat ID now has its own self-service deletion, in the app
+  and on `id.bsfchat.com`; policy §6 and §5.8 above say so.)*
 - **Anything beyond what §10 deletes** — a particular message, a particular
   file. Policy §10 and §12.
 
@@ -777,7 +846,7 @@ is the second defect in that table, alongside the backups line.
 Self-hosted chat for teams and communities. No ads, no tracking, no telemetry.
 ```
 
-### 8.2 Full description — 2,941 / 4,000
+### 8.2 Full description — 3,053 / 4,000
 
 Unwrapped so Play renders it as paragraphs. Identical wording to
 `STORE-LISTING.md` §2.3.
@@ -785,9 +854,9 @@ Unwrapped so Play renders it as paragraphs. Identical wording to
 ```
 BSFChat is chat without the bullshit.
 
-No ads. No analytics. No crash reporting. No advertising ID, no Firebase, no Google Play Services dependency, no third-party SDKs of any kind. Not "anonymised" analytics — none at all. The source is public, so you can check rather than trust.
+No ads. No analytics. No crash reporting. No advertising ID, and no tracking SDKs of any kind. Not "anonymised" analytics — none at all. The source is public, so you can check rather than trust.
 
-And no servers of ours in the middle. BSFChat is self-hosted: your messages live on a server you or your community runs — a rented box, a machine in the office, a Pi in a cupboard. We do not have a copy, we cannot read your channels, and on most servers we do not know they exist.
+And no servers of ours in the middle of your conversations. BSFChat is self-hosted: your messages live on a server you or your community runs — a rented box, a machine in the office, a Pi in a cupboard. We do not have a copy, we cannot read your channels, and on most servers we do not know they exist.
 
 WHAT YOU GET
 
@@ -801,7 +870,7 @@ WHAT YOU GET
 • File attachments and inline images, plus "Share to BSFChat" from other apps
 • Full-text search across your history
 • Multiple servers in one app, each with its own account
-• Background notifications on your own device — no Firebase, nothing sent to Google
+• Push notifications that never carry your messages: "New message" by default, sender and room names only if you turn them on — or keep a background connection instead and nothing goes through Google
 
 ONE ACCOUNT, EVERY SERVER
 
@@ -817,7 +886,7 @@ No paid tier. No upsell. No "upgrade for bigger uploads". No engagement mechanic
 
 SAFETY
 
-Block anyone from their profile card, on any server. They are not told, and their messages and invitations stop reaching you on every device you sign in on. Report a message or a user to that server's administrators. Delete your account from inside the app — read the privacy policy first, because messages you have already sent stay in their channels, and we would rather say so now.
+Block anyone from their profile card, on any server. They are not told, and their messages and invitations stop reaching you on every device you sign in on. Report a message or a user to that server's administrators. Delete your account, and your BSFChat ID, from inside the app — read the privacy policy first, because messages you have already sent stay in their channels, and we would rather say so now.
 
 HONEST LIMITS
 
@@ -916,8 +985,9 @@ ACCOUNT DELETION
   username, plus the password if the account has one. Immediate and
   irreversible. Messages already sent remain in their channels, which the
   privacy policy states before the button is pressed. Deleting a chat-server
-  account does not delete a BSFChat ID at id.bsfchat.com; that is removed by
-  hand on request to support@bsfchat.com. Web route:
+  account does not delete a BSFChat ID at id.bsfchat.com; that has its own
+  button, ... > Your profile > "Delete BSFChat ID...", which opens the account
+  page at https://id.bsfchat.com/profile.html#delete. Web route:
   https://bsfchat.com/support
 
 FOREGROUND SERVICES
@@ -927,20 +997,23 @@ FOREGROUND SERVICES
   • camera (VoiceService, same service): the user can turn their camera on
     inside a voice channel, and the call - video included - must survive
     backgrounding for the same reason.
-  • dataSync (SyncService): maintains the connection to the user's chosen
-    server so messages can raise a local notification while the app is
-    backgrounded. There is no Firebase Cloud Messaging in this app -
-    notifications are generated on the device and no notification content is
-    sent to Google.
+  • dataSync (SyncService): an opt-in alternative to push. Notifications use
+    Firebase Cloud Messaging by default; with "Keep a background connection
+    instead of push" turned on in Client settings > Notifications (or on a
+    device without Google Play services), SyncService maintains the connection
+    to the user's chosen server so messages raise a local notification while
+    the app is backgrounded, and nothing goes through Google.
   • mediaProjection (MediaProjectionService): required by the platform for
     screen sharing into a voice channel. Started only after the user accepts
     the system screen-capture consent dialog.
 
-NO ADS, NO ANALYTICS, NO THIRD-PARTY SDKS
+NO ADS, NO ANALYTICS
 
-  The app contains no advertising, no analytics, no crash reporting, no
-  advertising identifier and no Google Play Services dependency. Android Auto
-  Backup is disabled (allowBackup="false") so that sign-in tokens are never
+  The app contains no advertising, no analytics, no crash reporting and no
+  advertising identifier. The only Google component is Firebase Cloud
+  Messaging, used for push notifications; notification payloads carry no
+  message text. Sign-in tokens are kept in the Android Keystore, and Android
+  Auto Backup is disabled (allowBackup="false") so that app data is never
   copied to Google Drive.
 
 Privacy policy: https://bsfchat.com/privacy
@@ -993,7 +1066,7 @@ Two things that *would* block it if they were wrong, and are not:
 | **Icon is 512 px, not larger** | Play wants exactly 512 × 512, so this is right. `BSFChat-1024.png` is the source if you ever need to regenerate. |
 | **No `networkSecurityConfig`** | See §7.3. |
 | **No LICENSE file in any repo** | The listing copy says "the source is public", not "open source". Keep it that way until `STORE-LISTING.md` §0.6 is decided. |
-| **Push notifications and email are in the policy as planned changes** | Both would require editing the Data Safety form before the release that ships them (§3.5). |
+| **Email is in the policy as a planned change** | It would require editing the Data Safety form before the release that ships it (§3.5). Push, the other one, has shipped and is in the form. |
 | **Artifact expires 2026-12-27** | After that, rebuild from `v0.0.48-rc.8`; same versionCode 4708. |
 
 ---
